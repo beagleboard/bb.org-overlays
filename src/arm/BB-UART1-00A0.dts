@@ -36,8 +36,8 @@
 				pinctrl-single,pins = <
 					BONE_P9_24 (PIN_OUTPUT | MUX_MODE0)	// uart1_txd.uart1_txd
 					BONE_P9_26 (PIN_INPUT | MUX_MODE0)	// uart1_rxd.uart1_rxd
-					BONE_P9_19 (PIN_OUTPUT | MUX_MODE0)	// uart1_rtsn.uart1_rtsn
-					BONE_P9_20 (PIN_INPUT | MUX_MODE0)	// uart1_ctsn.uart1_ctsn
+				//	BONE_P9_19 (PIN_OUTPUT | MUX_MODE0)	// uart1_rtsn.uart1_rtsn
+				//	BONE_P9_20 (PIN_INPUT | MUX_MODE0)	// uart1_ctsn.uart1_ctsn
 				>;
 			};
 		};
