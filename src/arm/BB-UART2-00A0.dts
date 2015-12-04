@@ -36,8 +36,8 @@
 				pinctrl-single,pins = <
 					BONE_P9_21 (PIN_OUTPUT | MUX_MODE1)	// spi0_d0.uart2_txd
 					BONE_P9_22 (PIN_INPUT  | MUX_MODE1)	// spi0_sclk.uart2_rxd
-				//	BONE_P8_38 (PIN_OUTPUT | MUX_MODE6)	// lcd_data9.uart2_rtsn
-				//	BONE_P8_37 (PIN_INPUT  | MUX_MODE6)	// lcd_data8.uart2_ctsn
+					BONE_P8_38 (PIN_OUTPUT | MUX_MODE6)	// lcd_data9.uart2_rtsn
+					BONE_P8_37 (PIN_INPUT  | MUX_MODE6)	// lcd_data8.uart2_ctsn
 				>;
 			};
 		};
