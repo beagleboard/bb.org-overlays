@@ -7,8 +7,7 @@
  *
  * Enable eQEP2 on the Beaglebone White and Black
  */
-/dts-v1/;
-/plugin/;
+/dts-v1/ /plugin/;
 
 #include <dt-bindings/board/am335x-bbw-bbb-base.h>
 #include <dt-bindings/gpio/gpio.h>
