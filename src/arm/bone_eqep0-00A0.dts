@@ -68,6 +68,7 @@
 			invert_qb = <0>;   	// invert channel B input?
 			invert_qi = <0>;   	// invert index input?
 			invert_qs = <0>;   	// invert strobe input?
+			omit_interrupt = <0>;	// 1 -> do not install interrupt handler, 0 -> do install
 
 			status = "okay";
 		};

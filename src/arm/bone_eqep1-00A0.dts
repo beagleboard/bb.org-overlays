@@ -56,6 +56,7 @@
 			pinctrl-names = "default";
 			pinctrl-0 = <&pinctrl_eqep1>;
 
+#if 1	// encoder mode
 			count_mode = <1>;	// count_mode is not userspace op_mode
 			// 0 -> Quadrature mode, normal 90 phase offset cha & chb.
 			// 1 -> Direction mode.  cha input = clock, chb input = direction
@@ -66,6 +67,23 @@
 			invert_qb = <0>;   	// invert channel B input?
 			invert_qi = <0>;   	// invert index input?
 			invert_qs = <0>;   	// invert strobe input?
+			omit_interrupt = <0>;	// 1 -> do not install interrupt handler, 0 -> do install
+
+#else	// frequency mode
+
+			count_mode = <2>;	// count_mode 2 is compatible with userspace op_mode=1
+			// 0 -> Quadrature mode, normal 90 phase offset cha & chb.
+			// 1 -> Direction mode.  cha input = clock, chb input = direction
+			// 2 -> UP count mode for frequency measurement QDIR=1, ignore direction input
+			// 3 -> DOWN count mode for frequency measurement QDIR=0, ignore direction input
+
+			swap_inputs = <0>;  	// swap channel A and B? (0 - no, 1 - yes)
+			invert_qa = <0>;    	// invert channel A input?
+			invert_qb = <0>;    	// invert channel B input?
+			invert_qi = <0>;    	// invert the index input?
+			invert_qs = <0>;    	// invert the strobe input?
+			omit_interrupt = <1>;	// not needed in frequency mode
+#endif
 
 			status = "okay";
 		};
