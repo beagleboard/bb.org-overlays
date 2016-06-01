@@ -12,11 +12,11 @@
 /plugin/;
 
 / {
-	compatible = "ti,beaglebone", "ti,beaglebone-black", "ti,beaglebone-green";
+    compatible = "ti,beaglebone", "ti,beaglebone-black";
 
     /* identification */
     part-number = "BB-BONE-REPLICAP";
-    version = "00B1";
+    version = "00B3";
 
     /* state the resources this cape uses */
     exclusive-use =
@@ -50,7 +50,7 @@
         "P9.33", /* AIN4        */
         "P9.35", /* AIN6        */
         "P9.36", /* AIN5        */
-	"P9.41", /* ENABLE_PWM  */
+        "P9.41", /* ENABLE_PWM  */
         "P9.42"; /* SPI1_CS1	*/
 
     fragment@0 {
