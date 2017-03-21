@@ -22,7 +22,7 @@
 	compatible = "ti,beaglebone", "ti,beaglebone-black", "ti,beaglebone-green";
 
     /* identification */
-    part-number = "cape-bone-audio";
+    part-number = "cape-univ-audio";
     version = "00A0";
 
     /* state the resources this cape uses */
@@ -133,6 +133,7 @@
             /* P9 Header            */
             /************************/
 
+ 
             P9_25_pinmux {
                 compatible = "bone-pinmux-helper";
                 status = "okay";
