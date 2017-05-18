@@ -1,6 +1,10 @@
 /*
- * Copyright (C) 2015 Robert Nelson <robertcnelson@gmail.com>
+ * Copyright (C) 2013 CircuitCo
  *
+ * Virtual cape for SPI0 on connector pins P9.22 P9.21 P9.18 P9.17
+ *
+ * Added ADS8688 device on the SPI0 bus.
+ * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
@@ -8,36 +12,33 @@
 /dts-v1/;
 /plugin/;
 
-#include <dt-bindings/board/am335x-bbw-bbb-base.h>
-#include <dt-bindings/pinctrl/am33xx.h>
-
 / {
 	compatible = "ti,beaglebone", "ti,beaglebone-black", "ti,beaglebone-green";
 
 	/* identification */
-	part-number = "BB-SPI0-MCP3008";
+	part-number = "BB-SPI0-ADS8688";
 	version = "00A0";
 
 	/* state the resources this cape uses */
 	exclusive-use =
 		/* the pin header uses */
-		"P9.22",	/* spi0_sclk, SPI0_SCLK */
-		"P9.21",	/* spi0_d0, SPI0_MISO */
-		"P9.18",	/* spi0_d1, SPI0_MOSI */
-		"P9.17",	/* spi0_cs0, CS0 */
+		"P9.17",	/* spi0_cs0 */
+		"P9.18",	/* spi0_d1 */
+		"P9.21",	/* spi0_d0 */
+		"P9.22",	/* spi0_sclk */
 		/* the hardware ip uses */
 		"spi0";
 
 	fragment@0 {
 		target = <&am33xx_pinmux>;
 		__overlay__ {
-
+			/* default state has all gpios released and mode set to uart1 */
 			bb_spi0_pins: pinmux_bb_spi0_pins {
 				pinctrl-single,pins = <
-					BONE_P9_22 (PIN_INPUT_PULLUP | MUX_MODE0) /* spi0_sclk.spi0_sclk */
-					BONE_P9_21 (PIN_INPUT_PULLUP | MUX_MODE0) /* spi0_d0.spi0_d0 */
-					BONE_P9_18 (PIN_OUTPUT_PULLUP | MUX_MODE0) /* spi0_d0.spi0_d1 */
-					BONE_P9_17 (PIN_OUTPUT_PULLUP | MUX_MODE0)  /* spi0_cs0.spi0_cs0 */
+					0x150 0x30	/* spi0_sclk.spi0_sclk, INPUT_PULLUP | MODE0 */
+					0x154 0x30	/* spi0_d0.spi0_d0, INPUT_PULLUP | MODE0 */
+					0x158 0x10	/* spi0_d1.spi0_d1, OUTPUT_PULLUP | MODE0 */
+					0x15c 0x10	/* spi0_cs0.spi0_cs0, OUTPUT_PULLUP | MODE0 */
 				>;
 			};
 		};
@@ -49,15 +50,17 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 
+			status = "okay";
 			pinctrl-names = "default";
 			pinctrl-0 = <&bb_spi0_pins>;
-			status = "okay";
-			ti,pio-mode; /* disable dma when used as an overlay, dma gets stuck at 160 bits... */
 
-			mcp3x0x@0 {
-				spi-max-frequency = <1000000>;
+
+			/* add any spi devices connected here */
+			adc@0 {
+				compatible = "ti,ads8688";
 				reg = <0>;
-				compatible = "mcp3008";
+				/* vref-supply = <&vdd_supply>; */ /* not working yet */
+				spi-max-frequency = <1000000>;
 			};
 		};
 	};

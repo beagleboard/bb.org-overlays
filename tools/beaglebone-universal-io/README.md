@@ -28,6 +28,10 @@ should be present by default.
 If using a 3.8.13 kernel with capemgr, load the overlay as usual
 
     echo cape-universaln > /sys/devices/bone_capemgr.*/slots
+    
+From kernel 4.1 the slots file lives in a new home
+
+    echo cape-universaln > /sys/devices/platform/bone_capemgr/slots
 
 At this point, the various devices are loaded and all gpio have been
 exported.  All pins currently default to gpio inputs, with pull up or
