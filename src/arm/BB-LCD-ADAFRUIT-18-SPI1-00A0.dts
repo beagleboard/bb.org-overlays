@@ -46,24 +46,23 @@
 /plugin/;
 
 / {
-	compatible = "ti,beaglebone", "ti,beaglebone-black", "ti,beaglebone-green";
 
-	/* identification */
-	part-number = "BB-LCD-ADAFRUIT-18-SPI1";
-	version = "00A0";
-
-	/* state the resources this cape uses */
-	exclusive-use =
-		/* the pin header uses */
-		"P9.31",	/* spi1_sclk */
-		"P9.29",	/* spi1_d0 */
-		"P9.30",	/* spi1_d1 */
-		"P9.28",	/* spi1_cs0 */
-		// "P9.42",	/* spi1_cs1 */
-		/* the hardware ip uses */
-		"spi1";
-
+	/*
+	 * Free up the pins used by the cape from the pinmux helpers.
+	 */
 	fragment@0 {
+		target = <&ocp>;
+		__overlay__ {
+			P9_28_pinmux { status = "disabled"; };	/* spi1_cs0 */
+			P9_29_pinmux { status = "disabled"; };	/* spi1_d0 */
+			P9_30_pinmux { status = "disabled"; };	/* spi1_d1 */
+			P9_31_pinmux { status = "disabled"; };	/* spi1_sclk */
+			P9_12_pinmux { status = "disabled"; };	/* reset:60 P9.12 GPIO1_28 */
+			P9_15_pinmux { status = "disabled"; };	/* dc:48    P9.15 GPIO1_16 */
+		};
+	};
+
+	fragment@1 {
 		target = <&am33xx_pinmux>;
 		__overlay__ {
 			/* default state has all gpios released and mode set to uart1 */
@@ -79,7 +78,7 @@
 		};
 	};
 
-	fragment@1 {
+	fragment@2 {
 		target = <&spi1>;
 		__overlay__ {
 			#address-cells = <1>;
@@ -88,7 +87,6 @@
 			status = "okay";
 			pinctrl-names = "default";
 			pinctrl-0 = <&bb_spi1_pins>;
-			ti,pio-mode; /* disable dma when used as an overlay, dma gets stuck at 160 bits... */
 
 			display@0{
 				status = "okay";
