@@ -15,8 +15,16 @@
  * This file was copied from src/arm/BB-SPIDEV1-00A0.dts and modified
  * by Drew Fustini based on an exmample from David Lechner.
  *
- * This Adafruit 1.8" TFT LCD should be connected to SPI1 bus:
+ * This is the Adafruit 1.8" TFT LCD:
  * https://www.adafruit.com/products/358
+ *
+ * It should be connected to BeagleBone SPI1 bus:
+ *
+ *   P9.12 <--> reset
+ *   P9.15 <--> dc
+ *   P9.28 <--> tft_cs
+ *   P9.30 <--> mosi
+ *   P9.31 <--> clk
  *
  * This overlay will load the mainline tinydrm st7735r driver by David Lechner:
  * https://github.com/torvalds/linux/blob/master/drivers/gpu/drm/tinydrm/st7735r.c
