@@ -119,7 +119,7 @@
 				dc-gpios = <&gpio1 16 0>;      // lcd dc    P9.15 gpio1[16]
 				reset-gpios = <&gpio1 28 0>;   // lcd reset P9.12 gpio1[28]
 				// backlight is optional
-				backlight = <&gpio_backlight>; // lcd lite  P9.23 gpio1[17]
+				backlight = <&backlight_gpio>; // lcd lite  P9.23 gpio1[17]
 				// refer to https://elinux.org/Beagleboard:Cape_Expansion_Headers
 				// rotation is optional
 				// rotation = <270>;
