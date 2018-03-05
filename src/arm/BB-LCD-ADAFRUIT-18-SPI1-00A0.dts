@@ -22,7 +22,7 @@
  *
  *   P9.12 <--> reset
  *   P9.15 <--> dc
- *   P9.23 <--> lite (gpio)
+ *   P9.23 <--> lite (OPTIONAL)
  *   P9.28 <--> tft_cs
  *   P9.30 <--> mosi
  *   P9.31 <--> clk
@@ -59,6 +59,7 @@
 	fragment@0 {
 		target-path = "/";
 		__overlay__ {
+			/* backlight is optional */
 			backlight_gpio: backlight_gpio {
 				compatible = "gpio-backlight";
 				gpios = <&gpio1 17 GPIO_ACTIVE_HIGH>;
@@ -76,7 +77,7 @@
 		__overlay__ {
 			P9_12_pinmux { status = "disabled"; };	/* lcd reset */
 			P9_15_pinmux { status = "disabled"; };	/* lcd dc */
-			P9_23_pinmux { status = "disabled"; };	/* lcd gpio backlight */
+			P9_23_pinmux { status = "disabled"; };	/* lcd gpio backlight (OPTIONAL) */
 			P9_28_pinmux { status = "disabled"; };	/* spi1_cs0 */
 			P9_29_pinmux { status = "disabled"; };	/* spi1_d0 */
 			P9_30_pinmux { status = "disabled"; };	/* spi1_d1 */
@@ -117,6 +118,7 @@
 				spi-max-frequency = <16000000>;
 				dc-gpios = <&gpio1 16 0>;      // lcd dc    P9.15 gpio1[16]
 				reset-gpios = <&gpio1 28 0>;   // lcd reset P9.12 gpio1[28]
+				// backlight is optional
 				backlight = <&gpio_backlight>; // lcd lite  P9.23 gpio1[17]
 				// refer to https://elinux.org/Beagleboard:Cape_Expansion_Headers
 				// rotation is optional
