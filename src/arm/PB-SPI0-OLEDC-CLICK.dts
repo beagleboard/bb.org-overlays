@@ -24,20 +24,20 @@
 	fragment@0 {
 		target = <&ocp>;
 		__overlay__ {
-			P1_34_pinmux { status = "disabled"; };  /* EN - gpio0_26*/
-			P1_36_pinmux { status = "disabled"; };	/* D/C - gpio3_14*/
-			P2_25_pinmux { status = "disabled"; };	/* MOSI - gpio1_9 */
-			P2_27_pinmux { status = "disabled"; };	/* MISO - gpio1_8 */
-			P2_29_pinmux { status = "disabled"; };	/* CLK - gpio0_7 */
-			P2_31_pinmux { status = "disabled"; };	/* CS - gpio0_19 */
-			P2_33_pinmux { status = "disabled"; };	/* RST - gpio1_13 */
+			P2_03_pinmux { status = "disabled"; };  /* EN - gpio0_23*/
+			P2_01_pinmux { status = "disabled"; };	/* D/C - gpio1_18 */
+			P1_12_pinmux { status = "disabled"; };	/* MOSI - gpio0_4 */
+			P1_10_pinmux { status = "disabled"; };	/* MISO - gpio0_3 */
+			P1_08_pinmux { status = "disabled"; };	/* CLK - gpio0_2 */
+			P1_06_pinmux { status = "disabled"; };	/* CS - gpio0_5 */
+			P1_04_pinmux { status = "disabled"; };	/* RST - gpio2_25 */
 			cape-universal { status = "disabled"; };
 			cape-universal@1 { status = "disabled"; };
 		};
 	};
 
 	fragment@1 {
-		target = <&spi1>;
+		target = <&spi0>;
 		__overlay__ {
 			#address-cells = <1>;
 			#size-cells = <0>;
@@ -54,12 +54,12 @@
 				compatible = "solomon,ssd1351";
 				pinctrl-names = "default";
 				pinctrl-0 = <
-					&P2_31_spi_cs_pin
-					&P2_29_spi_sclk_pin
-					&P2_27_spi_pin
-					&P2_25_spi_pin
-					&P1_36_gpio_pin
-					&P2_33_gpio_pin
+					&P1_06_spi_cs_pin
+					&P1_08_spi_sclk_pin
+					&P1_10_spi_pin
+					&P1_12_spi_pin
+					&P2_01_gpio_pin
+					&P1_04_gpio_pin
 				>;
 				spi-max-frequency = <6000000>;
 				width = <128>;
@@ -70,8 +70,8 @@
 				buswidth = <8>;
 				backlight = <2>;
 				debug = <3>;
-				reset-gpios = <&gpio1 13 0>;
-				dc-gpios = <&gpio3 14 0>;
+				reset-gpios = <&gpio2 25 0>;
+				dc-gpios = <&gpio1 18 0>;
 			};
 		};
 		
@@ -86,9 +86,9 @@
 				pinctrl-names = "default";
 				pinctrl-0 = <>;
 
-				P1_34 {
-					gpio-name = "P1_34";
-					gpio = <&gpio0 26 0>;
+				P2_03 {
+					gpio-name = "P2_03";
+					gpio = <&gpio0 23 0>;
 					output;
 					init-high;
 				};
