@@ -1,0 +1,69 @@
+/*
+ * Copyright (C) 2018 Tim Small <tim@seoss.co.uk>
+ *
+ * Based on PB-I2C2-RTC-PCF8523.dts:
+ * 
+ * Copyright (C) 2018 Robert Nelson <robertcnelson@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ *
+ * This overlay is for a Maxim (Dallas) DS1307 RTC connected via the
+ * BeagleBone's second I2C bus.
+ * https://www.maximintegrated.com/en/products/digital/real-time-clocks/DS1307.html
+ * 
+ * It was built for the South Coast Science "DFE" air quality monitoring
+ * cape, but may be useful for any hardware which includes a DS1307
+ *
+ * https://www.southcoastscience.com/products/
+ *
+ * https://github.com/south-coast-science/scs_documentation/wiki/Digital-Front-End-%28DFE%29-for-BeagleBone-v1
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/board/am335x-bbw-bbb-base.h>
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/am33xx.h>
+
+/ {
+	fragment@0 {
+		target-path="/";
+		__overlay__ {
+			aliases {
+				rtc0 = &extrtc;
+				/* The OMAP RTC implementation in the BBB is
+				 * buggy, so that it cannot be used as a
+				 * battery-backed RTS, so that it loses its
+				 * contents when power is removed from the
+				 * Beaglebone...
+				 *
+				 * We move the omap built-in RTC to rtc1, so
+				 * that userspace defaults to using the DS1307.
+				 *
+				 * The omap RTC must remain enabled because it
+				 * is also used during the reboot process on the
+				 * BBB.
+				 */
+				rtc1 = "/ocp/rtc@44e3e000";
+			};
+		};
+	};
+
+	fragment@1 {
+		target = <&i2c2>;
+		__overlay__ {
+			status = "okay";
+
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			extrtc: ds1307@68 {
+				compatible = "maxim,ds1307";
+				reg = <0x68>; /* DS1307 has a fixed I2C addr */
+			};
+		};
+	};
+};
