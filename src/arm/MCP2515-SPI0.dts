@@ -1,0 +1,84 @@
+/*
+   From https://github.com/battlesnake/beaglebone-spi0-mcp2515/blob/master/MCP2515.dts
+   by Mark K Cowan
+
+   GitHub gist:
+   https://gist.github.com/pdp7/20dddbeffe83082e3c94ab0903563783
+
+   Wire the MCP2515 to SPI0 on the BeagleBone Black:
+   https://photos.app.goo.gl/1UUAHhRngzwiVWha9
+
+   add this to /boot/uEnv.txt:
+   uboot_overlay_addr0=/lib/firmware/BB-SPIDEV0-00A0.dtbo
+   uboot_overlay_addr1=/lib/firmware/MCP2515.dtbo
+*/
+
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "ti,beaglebone", "ti,beaglebone-black", "ti,beaglebone-green";
+
+	exclusive-use = "P8.6", "gpio1_3";
+
+	fragment@0 {
+		target = <&spi0>;
+		__overlay__ {
+			status = "okay";
+			spidev@0 {
+				status = "disabled";
+			};
+		};
+	};
+
+	fragment@1 {
+		target = <&am33xx_pinmux>;
+		__overlay__ {
+			mcp2515_int: mcp2515_int {
+				pinctrl-single,pins = < 0x00c 0x37 >;
+			};
+		};
+	};
+
+	fragment@2 {
+		target-path = "/";
+		__overlay__ {
+			mcp2515_clock: mcp2515_clock {
+				compatible = "fixed-clock";
+				#clock-cells = <0>;
+				clock-frequency = <8000000>;
+			};
+		};
+	};
+
+	fragment@3 {
+		target = <&spi0>;
+		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			can0: mcp2515@0 {
+				status = "okay";
+				reg = <0>;
+				compatible = "microchip,mcp2515";
+				pinctrl-names = "default";
+				pinctrl-0 = <&mcp2515_int>;
+				spi-max-frequency = <10000000>;
+				interrupt-parent = <&gpio1>;
+				interrupts = <3 2>;
+				clocks = <&mcp2515_clock>;
+
+				mcp251x,oscillator-frequency = <8000000>;
+				mcp251x,irq-gpios = <&gpio1 3 0>;
+				mcp251x,stay-awake = <1>;
+				mcp251x,enable-clkout = <1>;
+			};
+		};
+	};
+
+	__overrides__ {
+		oscillator = <&mcp2515_clock>,"clock-frequency:0";
+		spimaxfrequency = <&can0>,"spi-max-frequency:0";
+		interrupt = <&mcp2515_int>,"pinctrl-single,pins:0",<&can0>,"interrupts:0";
+	};
+
+};
