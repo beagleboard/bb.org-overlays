@@ -1201,7 +1201,7 @@ listmodes () {
 	eval MODES="\$${PIN}_PINMUX"
 	eval INFO="\$${PIN}_INFO"
 	if [ -z "$MODES" ] ; then
-		echo_err "Pin is not modifyable: $1 $INFO"
+		echo_err "Pin is not modifiable: $1 $INFO"
 		exit 1
 	else
 		echo "$MODES"
