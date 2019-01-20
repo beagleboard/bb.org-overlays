@@ -5,7 +5,7 @@ GPIODIR=/sys/class/gpio
 BOARD="original"
 
 disable_capemgr_load=$(grep -c bone_capemgr.uboot_capemgr_enabled=1 /proc/cmdline)
-machine=$(cat /proc/device-tree/model | sed "s/ /_/g" | tr -d '\000')
+machine=$(sed "s/ /_/g;s/\o0//g" /proc/device-tree/model)
 case "${machine}" in
 TI_AM335x_BeagleBone_Blue)
 	#overlays built-in, no slots file...
