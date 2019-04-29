@@ -74,7 +74,7 @@
         __overlay__ {
             #address-cells = <1>;
             #size-cells = <0>;
-            can0: mcp2515@0 {
+            can0: mcp2515@1 {
                 status = "okay";
                 /* use Chip Select 1. P2.31 pin is labelled
                    "SPI1 CS" on PB silk and is spi1_cs1 */
