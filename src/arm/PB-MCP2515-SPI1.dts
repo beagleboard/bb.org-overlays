@@ -1,0 +1,104 @@
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/am33xx.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+
+/ {
+        
+        fragment@0 {
+                target = <&ocp>;
+                __overlay__ {
+                        P2_25_pinmux { status = "disabled"; };  /* SPI1 MOSI - gpio1_9 */
+                        P2_27_pinmux { status = "disabled"; };  /* SPI1 MISO - gpio1_8 */
+                        P2_29_pinmux { status = "disabled"; };  /* SPI1 CLK - gpio0_7 */
+                        P2_30_pinmux { status = "disabled"; };  /* SPI1 CS0 - gpio3_17 */
+                        P2_31_pinmux { status = "disabled"; };  /* SPI1 CS1 - gpio0_19 */
+                        P2_08_pinmux { status = "disabled"; };  /* SWC nINT */
+                        P2_32_pinmux { status = "disabled"; };  /* SWC nRESET */
+                        P2_06_pinmux { status = "disabled"; };  /* SWC M0 */
+                        P2_18_pinmux { status = "disabled"; };  /* SWC M1 */
+                };
+        };
+
+        fragment@1 {
+                target = <&spi1>;
+                __overlay__ {
+                        status = "okay";
+                        pinctrl-names = "default";
+                        /* pinmux definitions used by pinctrl for these pins:
+                           https://github.com/beagleboard/linux/blob/4.14/arch/arm/boot/dts/am335x-pocketbeagle.dts#L692
+                        */
+                        pinctrl-0 = <
+                               /* pull-up on P2_06 and P2_18 only yields 1.27V, so set high via /sys/class/gpio to get 3.3V for SWCAN normal mode */
+                               &P2_06_gpio_pin  /* SWC M0 */
+                               &P2_18_gpio_pin  /* SWC M1 */
+                               &P2_32_gpio_pu_pin  /* SWC nRESET: enable pullup */
+                               &P2_08_default_pin  /* SWC  nINT: use mode 0x37 */
+                               &P2_25_spi_pin      /* SPI1 MOSI: uart0_rtsn.spi1_d1*/
+                               &P2_27_spi_pin      /* SPI1 MISO: uart0_ctsn.spi1_d0 */
+                               &P2_29_spi_sclk_pin /* SPI1  CLK: eCAP0_in_PWM0_out.spi1_sclk */
+                               &P2_30_spi_cs_pin   /* SPI1  CS0: mcasp0_ahclkr.spi1_cs0 */
+                               &P2_31_spi_cs_pin   /* SPI1  CS1: xdma_event_intr0.spi1_cs1 */
+                        >;
+
+                        channel@0{ status = "disabled"; };
+                        channel@1{ status = "disabled"; };
+                };
+        };
+
+
+        fragment@2 {
+                target = <&am33xx_pinmux>;
+                __overlay__ {
+                        mcp2515_int: mcp2515_int {
+                               pinctrl-single,pins = < 0x087 0x37 >;
+                        };
+                };
+        };
+
+    fragment@3 {
+        target-path = "/";
+        __overlay__ {
+            mcp2515_clock: mcp2515_clock {
+                compatible = "fixed-clock";
+                #clock-cells = <0>;
+                clock-frequency = <8000000>;
+            };
+        };
+    };
+
+    fragment@4 {
+        target = <&spi1>;
+        __overlay__ {
+            #address-cells = <1>;
+            #size-cells = <0>;
+            can0: mcp2515@0 {
+                status = "okay";
+                /* use Chip Select 1. P2.31 pin is labelled
+                   "SPI1 CS" on PB silk and is spi1_cs1 */
+                reg = <1>; 
+                compatible = "microchip,mcp2515";
+                pinctrl-names = "default";
+                pinctrl-0 = <&mcp2515_int>;
+                spi-max-frequency = <10000000>;
+                interrupt-parent = <&gpio1>;
+                interrupts = <28 2>;
+                clocks = <&mcp2515_clock>;
+
+                mcp251x,oscillator-frequency = <8000000>;
+                mcp251x,irq-gpios = <&gpio1 28 0>;
+                mcp251x,stay-awake = <1>;
+                mcp251x,enable-clkout = <1>;
+            };
+        };
+    };
+
+    __overrides__ {
+        oscillator = <&mcp2515_clock>,"clock-frequency:0";
+        spimaxfrequency = <&can0>,"spi-max-frequency:0";
+        interrupt = <&mcp2515_int>,"pinctrl-single,pins:0",<&can0>,"interrupts:0";
+    };
+
+};
