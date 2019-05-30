@@ -1,0 +1,73 @@
+/*
+ * Copyright (C) 2019 Tomas Arturo Herrera Castro <taherrera@uc.cl>
+ *
+ * Based on BB-I2C2-RTC-DS1338.dts:
+ *
+ * Copyright (C) 2018 Tim Small <tim@seoss.co.uk>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ * 
+ * This was code was writen by Chilean Software and Hardware developer 
+ * company Southern Lake Technologies for a custom-made datalogger. 
+ * 
+ * http://www.sltech.cl
+ *
+ * compiled using: dtc -O dtb -o BB-I2C2-RTC-DS3231.dtbo -b 0 -@ BB-I2C2-RTC-DS3231.dts
+ *
+ * tested on element14 BeagleBone Industrial
+ *
+ */
+
+/dts-v1/;
+/plugin/;
+
+/{
+
+	compatible = "ti,beaglebone", "ti,beaglebone-black", "ti,beaglebone-green";
+
+	/* identification */
+	part-number = "BB-DS3231";
+	version = "00A0";
+
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	fragment@0 {
+		target-path="/";
+		__overlay__ {
+			aliases {
+				rtc0 = &extrtc;
+				/* The OMAP RTC implementation in the BBB is
+				 * buggy, so that it cannot be used as a
+				 * battery-backed RTS, so that it loses its
+				 * contents when power is removed from the
+				 * Beaglebone...
+				 *
+				 * We move the omap built-in RTC to rtc1, so
+				 * that userspace defaults to using the DS1338.
+				 *
+				 * The omap RTC must remain enabled because it
+				 * is also used during the reboot process on the
+				 * BBB.
+				 */
+				rtc1 = "/ocp/rtc@44e3e000";
+			};
+		};
+	};
+
+	fragment@1 {
+		target = <&i2c2>;
+		__overlay__ {
+			status = "okay";
+			#address-cells = <1>;
+			#size-cells = <0>;
+ 
+			extrtc: ds3231@68 {
+				compatible = "maxim,ds3231";
+				reg = <0x68>;
+			};
+		};
+	};
+};
