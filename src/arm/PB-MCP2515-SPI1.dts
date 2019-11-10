@@ -77,7 +77,7 @@
             mcp2515_clock: mcp2515_clock {
                 compatible = "fixed-clock";
                 #clock-cells = <0>;
-                clock-frequency = <8000000>;
+                clock-frequency = <16000000>;
             };
         };
     };
@@ -100,7 +100,7 @@
                 interrupts = <28 2>;
                 clocks = <&mcp2515_clock>;
 
-                mcp251x,oscillator-frequency = <8000000>;
+                mcp251x,oscillator-frequency = <16000000>;
                 mcp251x,irq-gpios = <&gpio1 28 0>;
                 mcp251x,stay-awake = <1>;
                 mcp251x,enable-clkout = <1>;
