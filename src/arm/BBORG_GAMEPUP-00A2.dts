@@ -298,7 +298,6 @@
 				debug = <1>;
 				spi-max-frequency = <32000000>;
 				rotate = <0>;
-				bgr;
 				fps = <30>;
 			};
 		};
