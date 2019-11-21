@@ -1,0 +1,156 @@
+/*
+ * Peter Yang <turmary@126.com>
+ * Copyright (c) 2019 Seeed Studio
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/am33xx.h>
+
+/ {
+	/*
+	 * Helper to show loaded overlays under: /proc/device-tree/chosen/overlays/
+	 */
+	fragment@0 {
+		target-path="/";
+		__overlay__ {
+
+			chosen {
+				overlays {
+					PB-I2C1-TLV320AIC3104 = __TIMESTAMP__;
+				};
+			};
+		};
+	};
+
+	#if 0
+	/*
+	 * Free up the pins used by the cape from the pinmux helpers.
+	 */
+	fragment@1 {
+		target = <&ocp>;
+		__overlay__ {
+			P1_29_pinmux { status = "disabled"; };	/* mcasp0_ahclkx */
+			P1_33_pinmux { status = "disabled"; };	/* mcasp0_fsx */
+			P1_36_pinmux { status = "disabled"; };	/* mcasp0_aclkx */
+			P2_30_pinmux { status = "disabled"; };	/* mcasp0_axr2 */
+			P2_32_pinmux { status = "disabled"; };	/* mcasp0_axr0 */
+		};
+	};
+	#endif
+
+	fragment@2 {
+		target = <&am33xx_pinmux>;
+		__overlay__ {
+			pinmux_P1_29_default_pin {
+				pinctrl-single,pins = <
+					/* mcasp0_ahclkx.mcasp0_ahclkx */
+					AM33XX_IOPAD(0x09AC, PIN_OUTPUT_PULLDOWN | INPUT_EN | MUX_MODE0)
+				>;
+			};
+
+			pinmux_P1_33_default_pin {
+				pinctrl-single,pins = <
+					/* mcasp0_fsx.mcasp0_fsx */
+					AM33XX_IOPAD(0x0994, PIN_OUTPUT_PULLDOWN | INPUT_EN | MUX_MODE0)
+				>;
+			};
+
+			pinmux_P1_36_default_pin {
+				pinctrl-single,pins = <
+					/* mcasp0_aclkx.mcasp0_aclkx */
+					AM33XX_IOPAD(0x0990, PIN_OUTPUT_PULLDOWN | INPUT_EN | MUX_MODE0)
+				>;
+			};
+
+			pinmux_P2_30_default_pin {
+				pinctrl-single,pins = <
+					/* mcasp0_ahclkr.mcasp0_axr2 */
+					AM33XX_IOPAD(0x099C, PIN_OUTPUT_PULLDOWN | INPUT_EN | MUX_MODE2)
+				>;
+			};
+
+			pinmux_P2_32_default_pin {
+				pinctrl-single,pins = <
+					/* mcasp0_axr0.mcasp0_axr0 */
+					AM33XX_IOPAD(0x998, PIN_INPUT_PULLDOWN | MUX_MODE0)
+				>;
+			};
+		};
+	};
+
+	fragment@3 {
+		target-path="/";
+		__overlay__ {
+			sound {
+				compatible = "simple-audio-card";
+				simple-audio-card,name = "GroveBaseCape Audio";
+				simple-audio-card,widgets =
+					"Headphone", "Headphone Jack",
+					"Line", "Line In";
+				simple-audio-card,routing =
+					"Headphone Jack",       "HPLOUT",
+					"Headphone Jack",       "HPROUT",
+					"LINE1L",               "Line In",
+					"LINE1R",               "Line In";
+				simple-audio-card,format = "i2s";
+				simple-audio-card,bitclock-master = <&sound_master>;
+				simple-audio-card,frame-master = <&sound_master>;
+
+				sound_master: simple-audio-card,cpu {
+					sound-dai = <&mcasp0>;
+					clocks = <&mcasp0_fck>;
+					system-clock-direction-out;
+				};
+
+				simple-audio-card,codec {
+					#sound-dai-cells = <0>;
+					sound-dai = <&tlv320aic3104>;
+					clocks = <&mcasp0_fck>;
+					clock-names = "mclk";
+				};
+			};
+		};
+	};
+
+	fragment@4 {
+		target = <&i2c1>;
+		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			clock-frequency = <100000>;
+			status = "okay";
+
+			tlv320aic3104: tlv320aic3104@18 {
+				#sound-dai-cells = <0>;
+				compatible = "ti,tlv320aic3104";
+				reg = <0x18>;
+			};
+		};
+	};
+
+	fragment@5 {
+		target = <&mcasp0>;
+		__overlay__ {
+			#sound-dai-cells = <0>;
+			status = "okay";
+			op-mode = <0>;	/* MCASP_IIS_MODE */
+			tdm-slots = <2>;
+			num-serializer = <16>;
+			serial-dir = <	/* 0: INACTIVE, 1: TX, 2: RX */
+					1 0 2 0
+					0 0 0 0
+					0 0 0 0
+					0 0 0 0
+				>;
+			tx-num-evt = <1>;
+			rx-num-evt = <1>;
+		};
+	};
+};
