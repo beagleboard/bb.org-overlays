@@ -69,6 +69,13 @@
 				>;
 			};
 
+			pinmux_P2_28_default_pin {
+				pinctrl-single,pins = <
+					/* mcasp0_axr1.gpio3_20 */
+					AM33XX_IOPAD(0x09a8, PIN_OUTPUT | INPUT_EN | MUX_MODE7)
+				>;
+			};
+
 			pinmux_P2_30_default_pin {
 				pinctrl-single,pins = <
 					/* mcasp0_ahclkr.mcasp0_axr2 */
@@ -131,6 +138,7 @@
 				#sound-dai-cells = <0>;
 				compatible = "ti,tlv320aic3104";
 				reg = <0x18>;
+				gpio-reset = <&gpio3 20 0>;
 			};
 		};
 	};
@@ -153,4 +161,21 @@
 			rx-num-evt = <1>;
 		};
 	};
+
+	#if 0
+	/*
+	 * Previous kernels ( < 4.14 ) occupy gpio exclusivly by one driver.
+	 * uncomment below statments to disable cape-universal
+	 * which occupy all expansion gpios.
+	 */
+	fragment@6 {
+		target= <&ocp>;
+		__overlay__ {
+			cape-universal {
+				status = "disabled";
+				/delete-node/P2_28;
+			};
+		};
+	};
+	#endif
 };
