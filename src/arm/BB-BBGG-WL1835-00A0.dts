@@ -37,6 +37,14 @@
 				gpio = <&gpio3 9 0>;
 				enable-active-high;
 			};
+			leds {
+				led6 {
+					label = "beaglebone:green:Wlan";
+					gpios = <&gpio2 21 GPIO_ACTIVE_HIGH>;
+					linux,default-trigger = "mmc2";
+					default-state = "off";
+				};
+			};
 		};
 	};
 
@@ -74,6 +82,7 @@
 					AM33XX_PADCONF(AM335X_PIN_MII1_TX_CLK, PIN_OUTPUT_PULLDOWN, MUX_MODE7)	/* gmii1_txclk.gpio3_9 WL_EN */
 					AM33XX_PADCONF(AM335X_PIN_RMII1_REF_CLK, PIN_INPUT_PULLDOWN, MUX_MODE7)	/* rmii1_refclk.gpio0_29 WL_IRQ */
 					AM33XX_PADCONF(AM335X_PIN_MII1_RX_CLK, PIN_OUTPUT_PULLUP, MUX_MODE7)	/* gmii1_rxclk.gpio3_10 LS_BUF_EN */
+					AM33XX_IOPAD(0x940, PIN_OUTPUT | MUX_MODE7)		/* gmii1_rxd0.gpio2[21] WL_Active_LED*/
 				>;
 			};
 		};
