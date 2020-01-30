@@ -1,0 +1,71 @@
+pcm.onboard{
+    type hw
+    card 0
+}
+ctl.onboard {
+    type hw
+    card 0
+}
+
+### Dsnoop splited channels
+pcm.onboard_capture_left {
+     type dsnoop
+     ipc_key 32
+     slave {
+         pcm "onboard"
+         channels 2
+	 rate 48000
+    	 format S32_LE
+     }
+     bindings.0  0
+}
+pcm.onboard_playback_left {
+     type dmix
+     ipc_key 33
+     slave {
+         pcm "onboard"
+         channels 2
+     }
+     bindings.0  0
+}
+
+
+pcm.onboard_capture_right {
+     type dsnoop
+     ipc_key 32
+     slave {
+         pcm "onboard"
+         channels 2
+	 rate 48000
+	 format S32_LE
+     }
+     bindings.0  1
+}
+pcm.onboard_playback_right {
+     type dmix
+     ipc_key 33
+     slave {
+         pcm "onboard"
+         channels 2
+     }
+     bindings.0  1
+}
+
+
+### PLUGS ##
+### used with darkice
+### device = plug:plug_onboard_left
+pcm.plug_onboard_capture_left{
+        type plug
+        slave.pcm "onboard_capture_left"
+}
+pcm.plug_onboard_playback_left{
+        type plug
+        slave.pcm "onboard_playback_left"
+}
+
+pcm.!default {
+    type asym
+    playback.pcm "plug_onboard_playback_left"
+    capture.pcm "plug_onboard_capture_left"
+}
