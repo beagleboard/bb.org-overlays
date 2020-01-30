@@ -30,10 +30,10 @@
 			aliases {
 				/* SLOT I2C1 */
 				/*
-				adxl34x = "/ocp/i2c@4802a000/adxl34x@53";
+				adxl345 = "/ocp/i2c@4802a000/adxl345@53";
 				*/
 				/* SLOT I2C2 */
-				adxl34x = "/ocp/i2c@4819c000/adxl34x@53";
+				adxl345 = "/ocp/i2c@4819c000/adxl345@53";
 			};
 		};
 	};
@@ -54,8 +54,8 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 
-			adxl34x@53 {
-				compatible = "adi,adxl34x";
+			adxl345@53 {
+				compatible = "adi,adxl345";
 				reg = <0x53>;
 				status = "okay";
 			};
