@@ -268,13 +268,13 @@
 		__overlay__ {
 			emmc_rst {
 				gpio-hog;
-				gpio = <20 0>;
+				gpios = <20 0>;
 				output-low;
 				line-name = "emmc_resetN";
 			};
 			eeprom_en {
 				gpio-hog;
-				gpio = <16 0>;
+				gpios = <16 0>;
 				output-high;
 				line-name = "eeprom_enable";
 			};

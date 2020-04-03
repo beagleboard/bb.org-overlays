@@ -265,13 +265,13 @@
 		__overlay__ {
 			eeprom_disable {
 				gpio-hog;
-				gpio = <16 GPIO_ACTIVE_LOW>;
+				gpios = <16 GPIO_ACTIVE_LOW>;
 				output-low;
 				line-name = "eeprom_disable";
 			};
 			emmc_rst {
 				gpio-hog;
-				gpio = <20 GPIO_ACTIVE_LOW>;
+				gpios = <20 GPIO_ACTIVE_LOW>;
 				output-low;
 				line-name = "emmc_resetN";
 			};
