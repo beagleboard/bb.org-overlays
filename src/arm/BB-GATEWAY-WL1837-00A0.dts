@@ -82,7 +82,7 @@
 			P8_05_pinmux { status = "disabled"; };	/* P8_05: gpmc_ad2.mmc1_dat2 */
 			P8_06_pinmux { status = "disabled"; };	/* P8_06: gpmc_ad3.mmc1_dat3 */
 
-			P8_22_pinmux { status = "disabled"; };	/* P8_22: gpio0_2 WL_EN */
+			P9_22_pinmux { status = "disabled"; };	/* P9_22: gpio0_2 WL_EN */
 			P9_42_pinmux { status = "disabled"; };	/* P9_42: gpio0_7 WL_IRQ */
 			P8_07_pinmux { status = "disabled"; };	/* P8_07: gpmc_advn_ale.gpio2_2 Audio_sync */
 
@@ -176,7 +176,7 @@
 			/* wl18xx card enable/irq GPIOs. */
 			wlan_pins: pinmux_wlan_pins {
 				pinctrl-single,pins = <
-					AM33XX_IOPAD(0x814, PIN_OUTPUT_PULLUP | MUX_MODE7)	/* P8_22: gpio0_2 WL_EN */
+					AM33XX_IOPAD(0x950, PIN_OUTPUT_PULLUP | MUX_MODE7)	/* P9_22: gpio0_2 WL_EN */
 					AM33XX_IOPAD(0x964, PIN_INPUT_PULLUP | MUX_MODE7)	/* P9_42: gpio0_7 WL_IRQ */
 					AM33XX_IOPAD(0x890, PIN_OUTPUT_PULLDOWN | MUX_MODE7)	/* P8_07: gpmc_advn_ale.gpio2_2 Audio_sync */
 				>;
@@ -185,7 +185,7 @@
 			/* wl18xx card enable/irq GPIOs. */
 			wlan_pins_sleep: pinmux_wlan_pins_sleep {
 				pinctrl-single,pins = <
-					AM33XX_IOPAD(0x814, PIN_OUTPUT_PULLUP | MUX_MODE7)	/* P8_22: gpio0_2 WL_EN */
+					AM33XX_IOPAD(0x950, PIN_OUTPUT_PULLUP | MUX_MODE7)	/* P9_22: gpio0_2 WL_EN */
 					AM33XX_IOPAD(0x964, PIN_INPUT_PULLUP | MUX_MODE7)	/* P9_42: gpio0_7 WL_IRQ */
 					AM33XX_IOPAD(0x890, PIN_OUTPUT_PULLDOWN | MUX_MODE7)	/* P8_07: gpmc_advn_ale.gpio2_2 Audio_sync */
 				>;
