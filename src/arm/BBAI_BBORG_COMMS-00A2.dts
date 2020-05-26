@@ -14,28 +14,6 @@
 #include <dt-bindings/gpio/gpio.h>
 
 / {
-	compatible = "beagle,am5729-beagleboneai";
-
-	/* identification */
-	part-number = "BBORG_COMMS";
-	version = "00A2";
-
-	/* state the resources this cape uses */
-	exclusive-use =
-		/* the pin header uses */
-		// "P9.15",    /* SINK A */
-		// "P9.23",    /* SINK B */
-		// "P9.36",    /* LOOP A */
-		// "P9.35",    /* LOOP B */
-		"P9.24",    /* can2_rx */
-		"P9.26a",	/* can2_tx */
-		"P9.13",	/* uart5_txd */
-		"P9.11a",	/* uart5_rxd */
-
-		/* the hardware ip uses */
-		"uart5",
-		"dcan2";
-
     /*
 	 * Helper to show loaded overlays under: /proc/device-tree/chosen/overlays/
 	 */
