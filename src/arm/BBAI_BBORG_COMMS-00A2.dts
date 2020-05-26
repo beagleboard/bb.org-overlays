@@ -167,8 +167,8 @@
 			};
 			bborg_comms_rs485_pins: pinmux_comms_rs485_pins {
 				pinctrl-single,pins = <
-					DRA7XX_CORE_IOPAD(0x3730, PIN_OUTPUT_PULLUP | INPUT_EN | MUX_MODE4) /* C17: P9.13: uart5_txd */
-					DRA7XX_CORE_IOPAD(0x372C, PIN_OUTPUT_PULLUP | INPUT_EN | MUX_MODE4) /* B19: P9.11a: uart5_rxd */
+					DRA7XX_CORE_IOPAD(0x3730, PIN_OUTPUT | MUX_MODE4) /* C17: P9.13: uart5_txd */
+					DRA7XX_CORE_IOPAD(0x372C, PIN_INPUT  | MUX_MODE4) /* B19: P9.11a: uart5_rxd */
 				>;
 			};
 		};
