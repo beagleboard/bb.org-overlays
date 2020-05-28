@@ -1,0 +1,128 @@
+/*
+ * Copyright (C) 2020 Deepak Khatri <deepaklorkhatri7@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/board/am335x-bbw-bbb-base.h>
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/am33xx.h>
+
+/ {
+    /*
+	 * Helper to show loaded overlays under: /proc/device-tree/chosen/overlays/
+	 */
+	fragment@0 {
+		target-path="/";
+		__overlay__ {
+
+			chosen {
+				overlays {
+					BBORG_LOAD-00A2 = __TIMESTAMP__;
+				};
+			};
+		};
+	};
+
+    /*
+	 * Free up the pins used by the cape from the pinmux helpers.
+	 */
+	fragment@1 {
+		target = <&ocp>;
+		__overlay__ {
+            P9_42_pinmux { status = "disabled"; };  /* Sink1 */
+            P9_41_pinmux { status = "disabled"; };  /* Sink2 */
+            P9_30_pinmux { status = "disabled"; };  /* Sink3 */
+            P9_27_pinmux { status = "disabled"; };	/* Sink4 */
+			P8_12_pinmux { status = "disabled"; };  /* Sink5 */
+            P8_11_pinmux { status = "disabled"; };	/* Sink6 */
+			P8_15_pinmux { status = "disabled"; };  /* Sink7 */
+			P8_17_pinmux { status = "disabled"; };	/* Sink8 */
+		};
+	};
+
+    fragment@2 {
+		target = <&am33xx_pinmux>;
+		__overlay__ {
+
+			bb_gpio_load_pins: pinmux_bb_gpio_load_pins {
+				pinctrl-single,pins = <
+					BONE_P9_42 (PIN_OUTPUT_PULLDOWN | MUX_MODE7)    /* P9_42: gpio0_7 */
+					BONE_P9_41 (PIN_OUTPUT_PULLDOWN | MUX_MODE7)	/* P9_41: gpio3_20 */
+					BONE_P9_30 (PIN_OUTPUT_PULLDOWN | MUX_MODE7)	/* P9_30: gpio3_16 */
+					BONE_P9_27 (PIN_OUTPUT_PULLDOWN | MUX_MODE7)    /* P9_27: gpio3_19 */
+                    BONE_P8_12 (PIN_OUTPUT_PULLDOWN | MUX_MODE7)    /* P8_12: gpio1_12 */
+                    BONE_P8_11 (PIN_OUTPUT_PULLDOWN | MUX_MODE7)    /* P8_11: gpio1_13 */
+                    BONE_P8_15 (PIN_OUTPUT_PULLDOWN | MUX_MODE7)    /* P8_15: gpio1_15 */
+                    BONE_P8_17 (PIN_OUTPUT_PULLDOWN | MUX_MODE7)    /* P8_17: gpio0_27 */
+				>;
+			};
+		};
+	};
+
+    fragment@3 {
+		target-path="/";
+		__overlay__ {
+
+			leds {
+				pinctrl-names = "default";
+				pinctrl-0 = <&bb_gpio_load_pins>;
+
+				compatible = "gpio-leds";
+
+				sink@1 {
+					label = "load-sink1";
+					gpios = <&gpio0 7 GPIO_ACTIVE_HIGH>;
+					default-state = "keep";
+				};
+
+				sink@2 {
+					label = "load-sink2";
+					gpios = <&gpio3 20 GPIO_ACTIVE_HIGH>;
+					default-state = "keep";
+				};
+
+				sink@3 {
+					label = "load-sink3";
+					gpios = <&gpio3 16 GPIO_ACTIVE_HIGH>;
+					default-state = "keep";
+				};
+
+				sink@4 {
+					label = "load-sink4";
+					gpios = <&gpio3 19 GPIO_ACTIVE_HIGH>;
+					default-state = "keep";
+				};
+
+                sink@5 {
+					label = "load-sink5";
+					gpios = <&gpio1 12 GPIO_ACTIVE_HIGH>;
+					default-state = "keep";
+				};
+
+                sink@6 {
+					label = "load-sink6";
+					gpios = <&gpio1 13 GPIO_ACTIVE_HIGH>;
+					default-state = "keep";
+				};
+
+                sink@7 {
+					label = "load-sink7";
+					gpios = <&gpio1 15 GPIO_ACTIVE_HIGH>;
+					default-state = "keep";
+				};
+
+                sink@8 {
+					label = "load-sink8";
+					gpios = <&gpio0 27 GPIO_ACTIVE_HIGH>;
+					default-state = "keep";
+				};
+			};
+		};
+	};
+};
