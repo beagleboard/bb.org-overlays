@@ -1,0 +1,119 @@
+/*
+ * Copyright (C) 2020 Deepak Khatri <deepaklorkhatri7@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/board/am335x-bbw-bbb-base.h>
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/am33xx.h>
+
+/*
+ * Helper to show loaded overlays under: /proc/device-tree/chosen/overlays/
+ */
+&{/chosen} {
+	overlays {
+		BBORG_SERVO-00A2 = __TIMESTAMP__;
+	};
+};
+
+/*
+ * Free up the pins used by the cape from the pinmux helpers.
+ */
+&ocp {
+    P8_12_pinmux { status = "disabled"; };  /* IN1 */
+    P8_11_pinmux { status = "disabled"; };	/* IN2 */
+    P9_30_pinmux { status = "disabled"; };  /* IN3 */
+    P9_27_pinmux { status = "disabled"; };	/* IN4 */
+    P9_41_pinmux { status = "disabled"; };  /* IN5 */
+    P9_42_pinmux { status = "disabled"; };  /* IN6 */
+
+    P9_19_pinmux { status = "disabled"; };  /* i2c2.scl */
+    P9_20_pinmux { status = "disabled"; };	/* i2c2.sda */
+    P8_10_pinmux { status = "disabled"; };	/* servo.enable */
+};
+
+&am33xx_pinmux {
+
+    bborg_servo_input_pins: pinmux_bborg_servo_input_pins {
+        pinctrl-single,pins = <
+            BONE_P8_12 (PIN_OUTPUT_PULLDOWN | MUX_MODE7)    /* P8_12: gpio1_12 */
+            BONE_P8_11 (PIN_OUTPUT_PULLDOWN | MUX_MODE7)    /* P8_11: gpio1_13 */
+            BONE_P9_30 (PIN_OUTPUT_PULLDOWN | MUX_MODE7)    /* P9_30: gpio3_16 */
+            BONE_P9_27 (PIN_OUTPUT_PULLDOWN | MUX_MODE7)    /* P9_27: gpio3_19 */
+            BONE_P9_41 (PIN_OUTPUT_PULLDOWN | MUX_MODE7)    /* P9_41: gpio3_20 */
+            BONE_P9_42 (PIN_OUTPUT_PULLDOWN | MUX_MODE7)    /* P9_42: gpio0_7 */
+        >;
+    };
+
+
+    bborg_servo_pca9685_i2c_pins: bborg_servo_pca9685_i2c_pins {
+        pinctrl-single,pins = <
+            BONE_P9_19 (PIN_OUTPUT_PULLDOWN | MUX_MODE3)    /* P9_19: i2c2.scl */
+            BONE_P9_20 (PIN_OUTPUT_PULLDOWN | MUX_MODE3)    /* P9_20: i2c2.sda */
+        >;
+    };
+
+
+    bborg_servo_pca9685_en_pins: pinmux_bborg_servo_pca9685_en_pins {
+        pinctrl-single,pins = <
+            BONE_P8_10 (PIN_OUTPUT_PULLDOWN | MUX_MODE7)    /* P9_20: servo.en */
+        >;
+    };
+};
+
+&i2c2 {
+    pinctrl-names = "default";
+    pinctrl-0 = <&bborg_servo_pca9685_i2c_pins>;
+    status = "okay";
+    clock-frequency = <100000>;
+    #address-cells = <1>;
+    #size-cells = <0>;
+
+    pca9685_servo: pca9685_serve@7f {
+        compatible = "nxp, pca9685";
+        lable = "pca9685_servo";
+        pinctrl-names = "default";
+        pinctrl-0 = <&bborg_servo_pca9685_en_pins>;
+        enable-gpios = <&gpio2 4 GPIO_ACTIVE_HIGH>;
+        reg = <0x7f>;
+    };
+};
+
+&{/} {
+    gpio_inputs {
+        compatible = "gpio-keys";
+        pinctrl-names = "default";
+        pinctrl-0 = <&bborg_servo_input_pins>;
+
+        input@1 {
+            lable = "in1";
+            gpios = <&gpio1 12 GPIO_ACTIVE_HIGH>;
+        };
+        input@2 {
+            lable = "in2";
+            gpios = <&gpio1 13 GPIO_ACTIVE_HIGH>;
+        };
+        input@3 {
+            lable = "in3";
+            gpios = <&gpio3 16 GPIO_ACTIVE_HIGH>;
+        };
+        input@4 {
+            lable = "in4";
+            gpios = <&gpio3 19 GPIO_ACTIVE_HIGH>;
+        };
+        input@5 {
+            lable = "in5";
+            gpios = <&gpio3 20 GPIO_ACTIVE_HIGH>;
+        };
+        input@6 {
+            lable = "in6";
+            gpios = <&gpio0 7 GPIO_ACTIVE_HIGH>;
+        };
+    };
+};
