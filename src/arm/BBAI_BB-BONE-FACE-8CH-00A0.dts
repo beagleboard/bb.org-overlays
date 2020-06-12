@@ -1,0 +1,160 @@
+/*
+ * Copyright (C) 2020 Niklas Wantrupp <niklaswantrupp@web.de>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/dra.h>
+#include <dt-bindings/clock/dra7.h>
+
+/ {
+	fragment@0 {
+		target-path = "/";
+		__overlay__ {
+			chosen {
+				overlays {
+					BBAI_BB-BONE-FACE-8CH-00A0 = __TIMESTAMP__;
+				};
+			};
+		};
+	};
+	
+	fragment@1 {
+		target-path = "/";
+		__overlay__ {
+			spi_gpio: spi_gpio {
+				compatible = "spi-gpio";
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				sck-gpios = <&gpio8 15 0>; //P8.32
+				mosi-gpios = <&gpio8 13 0>; //P8.33
+				miso-gpios = <&gpio4 13 0>; //P8.14
+				cs-gpios = <&gpio8 18 0 &gpio8 14 0>; //P8.17 / P8.31
+				num-chipselects = <2>;
+
+				pinctrl-names = "default";
+				/* avoid dtc warnings */
+				pinctrl-0 = <&audiocard_spi_pins>;
+				status = "okay";
+
+				ad193x: ad193x@0{
+					pinctrl-names = "default";
+					pinctrl-0 = <&ad1938_codec_reset_muxing>;
+					#address-cells = <1>;
+					#size-cells = <0>;
+
+					compatible = "analog,ad1938";
+					status = "okay";
+					reset-gpio = <&gpio8 11 0>;
+					reg = <0>; //corresponds to cs
+					spi-max-frequency = <100000>;
+				};
+			};
+		};
+	};
+
+	fragment@2 {
+		target = <&dra7_pmx_core>;
+		__overlay__ {
+			ad1938_codec_reset_muxing: ad1938_codec_reset_muxing {
+				pinctrl-single,pins = <
+					DRA7XX_CORE_IOPAD (0x3564, PIN_INPUT_PULLDOWN | MUX_MODE14)      /*  MODE7 | RESET P8.34 */
+				>;
+			};
+
+			mcasp1_pins_sleep: mcasp1_pins_sleep {
+				pinctrl-single,pins = <
+					DRA7XX_CORE_IOPAD (0x3694, PIN_INPUT_PULLDOWN | MUX_MODE14)	/* mcasp1_ahclkx */
+					DRA7XX_CORE_IOPAD (0x36E0, PIN_INPUT_PULLDOWN | MUX_MODE14)	/* mcasp1_ax11 */
+					DRA7XX_CORE_IOPAD (0x36A8, PIN_INPUT_PULLDOWN | MUX_MODE14)	/* mcasp1_fsx */
+					DRA7XX_CORE_IOPAD (0x36A4, PIN_INPUT_PULLDOWN | MUX_MODE14)	/* mcasp1_aclkx */
+					DRA7XX_CORE_IOPAD (0x36B0, PIN_INPUT_PULLDOWN | MUX_MODE0)	/* mcasp1_fsr */
+					DRA7XX_CORE_IOPAD (0x36AC, PIN_INPUT_PULLDOWN | MUX_MODE0)	/* mcasp1_aclkr */
+					DRA7XX_CORE_IOPAD (0x36DC, PIN_INPUT_PULLDOWN | MUX_MODE14)	/* mcasp1_axr10 */
+				>;
+			};
+
+			mcasp1_pins: mcasp1_pins {
+				pinctrl-single,pins = <
+					DRA7XX_CORE_IOPAD (0x3694, PIN_INPUT_PULLDOWN | MUX_MODE3)	/* mcasp1_ahclkx */
+					DRA7XX_CORE_IOPAD (0x36E0, PIN_OUTPUT_PULLDOWN | MUX_MODE0) /* mcasp1_axr11 */
+					DRA7XX_CORE_IOPAD (0x36A8, PIN_INPUT_PULLDOWN | MUX_MODE0)	/* mcasp1_fsx */
+					DRA7XX_CORE_IOPAD (0x36A4, PIN_INPUT_PULLDOWN | MUX_MODE0)	/* mcasp1_aclkx */
+					DRA7XX_CORE_IOPAD (0x36B0, PIN_INPUT_PULLDOWN | MUX_MODE0)	/* mcasp1_fsr */
+					DRA7XX_CORE_IOPAD (0x36AC, PIN_INPUT_PULLDOWN | MUX_MODE0)	/* mcasp1_aclkr */
+					DRA7XX_CORE_IOPAD (0x36DC, PIN_INPUT_PULLDOWN | MUX_MODE0)	/* mcasp1_axr10 */
+				>;
+			};
+
+			audiocard_spi_pins: pinmux_audiocard_spi_pins { 
+				pinctrl-single,pins = <
+					DRA7XX_CORE_IOPAD (0x3618, PIN_INPUT_PULLUP | MUX_MODE14)	/* spi_sclk, 	MODE7 | INPUT_PULLUP | SPI_SCLK P8_32 */
+					DRA7XX_CORE_IOPAD (0x3598, PIN_INPUT_PULLUP | MUX_MODE14)	/* spi_miso, 	MODE7 | INPUT_PULLUP | SPI_MISO P8_14 */
+					DRA7XX_CORE_IOPAD (0x3610, PIN_OUTPUT_PULLUP | MUX_MODE14)	/* spi_mosi, 	MODE7 | OUTPUT_PULLUP | SPI_MOSI P8_33 */
+					DRA7XX_CORE_IOPAD (0x3624, PIN_OUTPUT_PULLUP | MUX_MODE14)  /* spi_cs0, 	MODE7 | OUTPUT_PULLUP | SPI_CS0 P8_17 */
+				>;
+			};
+		};
+	};
+
+	fragment@3 {
+		target = <&mcasp1>;
+		__overlay__ {
+			#sound-dai-cells= <0>;
+			pinctrl-names = "default", "sleep";
+			pinctrl-0 = <&mcasp1_pins>;
+			pinctrl-1 = <&mcasp1_pins_sleep>;
+			assigned-clocks = <&ipu_clkctrl DRA7_MCASP1_CLKCTRL 24>;
+			assigned-clock-parents = <&sys_clkin2>; /* 22579200 Hz (see dra7xx-clocks.dtsi) */
+			status = "okay";
+			op-mode = <0>;	/* MCASP_IIS_MODE */
+			tdm-slots = <8>;
+			num-serializer = <16>;
+			serial-dir = <	/* 0: INACTIVE, 1: TX, 2: RX */
+				0 0 0 0
+				0 0 0 0
+				0 0 2 1
+				0 0 0 0
+			>;
+			tx-num-evt = <1>;
+			rx-num-evt = <1>;
+		};
+	};
+
+	fragment@4 {
+		target-path = "/";
+		__overlay__ {
+			sound {
+				compatible = "ctag,face-2-4";
+				ti,model = "CTAG face-2-4 8CH";
+				ti,audio-codec = <&ad193x>;
+				ti,mcasp-controller = <&mcasp1>;
+				ti,audiocard-tdm-slots = <8>;
+				ti,codec-clock-rate = <24576000>;
+				ti,cpu-clock-rate = <24576000>;
+				status = "okay";
+				
+				ti,audio-codec-bit-delay-dac = <1>; //currently only supports 1 or 0 bit delay
+				ti,audio-codec-bit-delay-adc = <1>;
+				ti,mcasp-controller-bit-delay-tx = <1>;
+				ti,mcasp-controller-bit-delay-rx = <1>;
+				bb-device = <1>; //BBx15/BBAI
+				audio-routing =
+					"Line Out",             "DAC1OUT",
+					"Line Out",             "DAC2OUT",
+					"Line Out",             "DAC3OUT",
+					"Line Out",             "DAC4OUT",
+					"ADC1IN",               "Line In",
+					"ADC2IN",               "Line In";
+			};
+		};
+	};
+};

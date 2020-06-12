@@ -10,6 +10,10 @@
 /dts-v1/;
 /plugin/;
 
+#include <dt-bindings/board/am335x-bbw-bbb-base.h>
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/am33xx.h>
+
 / {
 	compatible = "ti,beaglebone", "ti,beaglebone-black", "ti,beaglebone-green";
 
@@ -35,13 +39,9 @@
 		/* the hardware ip uses */
 		"mcasp0", "spi_gpio";
 
-	/*
-	 * Helper to show loaded overlays under: /proc/device-tree/chosen/overlays/
-	 */
 	fragment@0 {
-		target-path="/";
+		target-path = "/";
 		__overlay__ {
-
 			chosen {
 				overlays {
 					BB-CTAG-SW-8CH-00A0 = __TIMESTAMP__;
@@ -69,52 +69,84 @@
 			P8_17_pinmux { status = "disabled"; };	/* spi_cs0 */
 		};
 	};
-
+	
 	fragment@2 {
-		target = <&am33xx_pinmux>;
+		target-path = "/";
 		__overlay__ {
-			mcasp0_pins: pinmix_mcasp0_pins {
-				pinctrl-single,pins = <
-					0x1ac 0x20	/* mcasp0_ahclkx,	MODE0 | INPUT_PULLDOWN | P9_25 */
-					0x19c 0x02	/* mcasp0_axr2,		MODE2 | OUTPUT_PULLDOWN | P9_28 */
-					0x194 0x20	/* mcasp0_fsx, 		MODE0 | INPUT_PULLDOWN | P9_29 */
-					0x190 0x20	/* mcasp0_aclkx, 	MODE0 | INPUT_PULLDOWN | P9_31 */
-					0x1a4 0x20	/* mcasp0_fsr,		MODE0 | INPUT_PULLDOWN | P9_27 */
-					0x078 0x26	/* mcasp0_aclkr,	MODE6 | INPUT_PULLDOWN | P9_12 */
-					0x198 0x20	/* mcasp0_axr0, 	MODE0 | INPUT_PULLDOWN | P9_30 */
-				>;
-			};
+			spi_gpio: spi_gpio {
+				compatible = "spi-gpio";
+				#address-cells = <1>;
+				#size-cells = <0>;
 
-			audiocard_spi_pins: pinmux_audiocard_spi_pins { 
-				pinctrl-single,pins = <
-					0x0DC 0x37	/* spi_sclk, 	MODE7 | INPUT_PULLUP | SPI_SCLK P8_32 */
-					0x028 0x37	/* spi_miso, 	MODE7 | INPUT_PULLUP | SPI_MISO P8_14 */
-					0x0D4 0x17	/* spi_mosi, 	MODE7 | OUTPUT_PULLUP | SPI_MOSI P8_33 */
-					0x02C 0x17	/* spi_cs0, 	MODE7 | OUTPUT_PULLUP | SPI_CS0 P8_17 */
-				>;
+				sck-gpios = <&gpio0 11 0>; //P8.32
+				mosi-gpios = <&gpio0 9 0>; //P8.33
+				miso-gpios = <&gpio0 26 0>; //P8.14
+				cs-gpios = <&gpio0 27 0 &gpio0 10 0>; //P8.17 / P8.31
+				num-chipselects = <2>;
+
+				pinctrl-names = "default";
+				/* avoid dtc warnings */
+				pinctrl-0 = <&audiocard_spi_pins>;
+				status = "okay";
+
+				ad193x: ad193x@0{
+					pinctrl-names = "default";
+					pinctrl-0 = <&ad1938_codec_reset_muxing>;
+					#address-cells = <1>;
+					#size-cells = <0>;
+
+					compatible = "analog,ad1938";
+					status = "okay";
+					reset-gpio = <&gpio2 17 0>;
+					reg = <0>; //corresponds to cs
+					spi-max-frequency = <100000>;
+				};
 			};
 		};
 	};
 
 	fragment@3 {
-		target = <&spi_gpio>;
+		target = <&am33xx_pinmux>;
 		__overlay__ {
-			pinctrl-names = "default";
-			pinctrl-0 = <&audiocard_spi_pins>;
-			status = "okay";
+			ad1938_codec_reset_muxing: ad1938_codec_reset_muxing {
+				pinctrl-single,pins = <
+					AM33XX_IOPAD (0x8cc, PIN_INPUT_PULLDOWN | MUX_MODE7)      /*  MODE7 | RESET P8.34 */
+				>;
+			};
 
-			/* avoid dtc warnings */
-			#address-cells = <1>;
-			#size-cells = <0>;
+			mcasp0_pins_sleep: mcasp0_pins_sleep {
+				pinctrl-single,pins = <
+					AM33XX_IOPAD (0x9ac, PIN_INPUT_PULLDOWN | MUX_MODE7)	/* mcasp0_ahclkx */
+					AM33XX_IOPAD (0x99c, PIN_INPUT_PULLDOWN | MUX_MODE7)	/* mcasp0_axr2 */
+					AM33XX_IOPAD (0x994, PIN_INPUT_PULLDOWN | MUX_MODE7)	/* mcasp0_fsx */
+					AM33XX_IOPAD (0x990, PIN_INPUT_PULLDOWN | MUX_MODE7)	/* mcasp0_aclkx */
+					AM33XX_IOPAD (0x9a4, PIN_INPUT_PULLDOWN | MUX_MODE0)	/* mcasp0_fsr */
+					AM33XX_IOPAD (0x878, PIN_INPUT_PULLDOWN | MUX_MODE6)	/* mcasp0_aclkr */
+					AM33XX_IOPAD (0x998, PIN_INPUT_PULLDOWN | MUX_MODE7)	/* mcasp0_axr0 */
+					0x06c (PIN_INPUT_PULLDOWN | MUX_MODE7)	/* gpio1[27] */
+				>;
+			};
 
-			ad193x: ad193x@0{
-				#address-cells = <1>;
-				#size-cells = <0>;
+			mcasp0_pins: mcasp0_pins {
+				pinctrl-single,pins = <
+					AM33XX_IOPAD (0x9ac, PIN_INPUT_PULLDOWN | MUX_MODE0)	/* mcasp0_ahclkx */
+					AM33XX_IOPAD (0x99c, PIN_OUTPUT_PULLDOWN | MUX_MODE2) /* mcasp0_axr2 */
+					AM33XX_IOPAD (0x994, PIN_INPUT_PULLDOWN | MUX_MODE0)	/* mcasp0_fsx */
+					AM33XX_IOPAD (0x990, PIN_INPUT_PULLDOWN | MUX_MODE0)	/* mcasp0_aclkx */
+					AM33XX_IOPAD (0x9a4, PIN_INPUT_PULLDOWN | MUX_MODE0)	/* mcasp0_fsr */
+					AM33XX_IOPAD (0x878, PIN_INPUT_PULLDOWN | MUX_MODE6)	/* mcasp0_aclkr */
+					AM33XX_IOPAD (0x998, PIN_INPUT_PULLDOWN | MUX_MODE0)	/* mcasp0_axr0 */
+					0x06c (PIN_OUTPUT_PULLDOWN | MUX_MODE7)	/* gpio1[27] (enable oscillator) */
+				>;
+			};
 
-				compatible = "analog,ad1938";
-
-				reg = <0>; //corresponds to cs
-				spi-max-frequency = <100000>;
+			audiocard_spi_pins: pinmux_audiocard_spi_pins { 
+				pinctrl-single,pins = <
+					AM33XX_IOPAD (0x8dc, PIN_INPUT_PULLUP | MUX_MODE7)	  /* spi_sclk, 	MODE7 | INPUT_PULLUP | SPI_SCLK P8_32 */
+					AM33XX_IOPAD (0x828, PIN_INPUT_PULLUP | MUX_MODE7)	  /* spi_miso, 	MODE7 | INPUT_PULLUP | SPI_MISO P8_14 */
+					AM33XX_IOPAD (0x8d4, PIN_OUTPUT_PULLUP | MUX_MODE7)  /* spi_mosi, 	MODE7 | OUTPUT_PULLUP | SPI_MOSI P8_33 */
+					AM33XX_IOPAD (0x82c, PIN_OUTPUT_PULLUP | MUX_MODE7)  /* spi_cs0, 	MODE7 | OUTPUT_PULLUP | SPI_CS0 P8_17 */
+				>;
 			};
 		};
 	};
@@ -122,15 +154,14 @@
 	fragment@4 {
 		target = <&mcasp0>;
 		__overlay__ {
-			pinctrl-names = "default";
+			pinctrl-names = "default", "sleep";
 			pinctrl-0 = <&mcasp0_pins>;
-
+			pinctrl-1 = <&mcasp0_pins_sleep>;
 			status = "okay";
-
 			op-mode = <0>;	/* MCASP_IIS_MODE */
 			tdm-slots = <8>;
 			num-serializer = <16>;
-			serial-dir = <  /* 0: INACTIVE, 1: TX, 2: RX */
+			serial-dir = <	/* 0: INACTIVE, 1: TX, 2: RX */
 				2 0 1 0
 				0 0 0 0
 				0 0 0 0
@@ -142,22 +173,37 @@
 	};
 
 	fragment@5 {
-		target = <&ocp>;
+		target-path = "/";
 		__overlay__ {
+
+			clk_mcasp0_fixed: clk_mcasp0_fixed {
+				#clock-cells = <0>;
+				compatible = "fixed-clock";
+				clock-frequency = <24576000>;
+			};
+
+			clk_mcasp0: clk_mcasp0 {
+				#clock-cells = <0>;
+				compatible = "gpio-gate-clock";
+				clocks = <&clk_mcasp0_fixed>;
+				enable-gpios = <&gpio1 27 GPIO_ACTIVE_HIGH>; /* BeagleBone Black Clk enable on GPIO1_27 */
+			};
 
 			sound {
 				compatible = "ctag,face-2-4";
-				model = "CTAG face-2-4 8CH";
-				audio-codec = <&ad193x>;
-				mcasp-controller = <&mcasp0>;
-				audiocard-tdm-slots = <8>;
-				codec-clock-rate = <24576000>;
-				cpu-clock-rate = <24576000>;
-				audio-codec-bit-delay-dac = <1>; //currently only supports 1 or 0 bit delay
-				audio-codec-bit-delay-adc = <1>;
-				mcasp-controller-bit-delay-tx = <1>;
-				mcasp-controller-bit-delay-rx = <1>;
-				bb-device = <0>; //BBB/BBG
+				ti,model = "CTAG face-2-4 8CH";
+				ti,audio-codec = <&ad193x>;
+				ti,mcasp-controller = <&mcasp0>;
+				ti,audiocard-tdm-slots = <8>;
+				ti,codec-clock-rate = <24576000>;
+				ti,cpu-clock-rate = <24576000>;
+				status = "okay";
+				
+				ti,audio-codec-bit-delay-dac = <1>; //currently only supports 1 or 0 bit delay
+				ti,audio-codec-bit-delay-adc = <1>;
+				ti,mcasp-controller-bit-delay-tx = <1>;
+				ti,mcasp-controller-bit-delay-rx = <1>;
+				bb-device = <0>; //BBB
 				audio-routing =
 					"Line Out",             "DAC1OUT",
 					"Line Out",             "DAC2OUT",
