@@ -1,0 +1,27 @@
+/*
+ * Copyright (C) 2020 Deepak Khatri <deepaklorkhatri7@gmail.com>
+ *
+ * Virtual cape for /bone/uart/1
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+ 
+/dts-v1/;
+/plugin/;
+
+&{/chosen} {
+    overlays {
+        BONE-UART1-00A0 = __TIMESTAMP__;
+    };
+};
+
+&ocp {
+    P9_24_pinmux { status = "disabled"; };
+    P9_26_pinmux { status = "disabled"; };
+};
+
+&bone_uart_1 {
+    status = "okay";
+};
