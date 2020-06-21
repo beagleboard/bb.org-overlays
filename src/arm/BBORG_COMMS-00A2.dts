@@ -8,6 +8,7 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
+
 /dts-v1/;
 /plugin/;
 
@@ -25,8 +26,8 @@
 };
 
 /*
-	* Free up the pins used by the cape from the pinmux helpers.
-	*/
+* Free up the pins used by the cape from the pinmux helpers.
+*/
 &ocp {
 	P9_24_pinmux { status = "disabled"; };	/* P9_24: uart1_txd.d_can1_rx */
 	P9_26_pinmux { status = "disabled"; };	/* P9_26: uart1_rxd.d_can1_tx */
@@ -75,10 +76,9 @@
 
 &{/} {
 
-	leds {
+	sinks {
 		pinctrl-names = "default";
 		pinctrl-0 = <&bborg_comms_sink_pins>;
-
 		compatible = "gpio-leds";
 
 		sink@1 {
