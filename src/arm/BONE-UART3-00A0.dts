@@ -11,16 +11,25 @@
 /dts-v1/;
 /plugin/;
 
+/*
+* Helper to show loaded overlays under: /proc/device-tree/chosen/overlays/
+*/
 &{/chosen} {
     overlays {
         BONE-UART3-00A0 = __TIMESTAMP__;
     };
 };
 
+/*
+* Free up the pins used by the cape from the pinmux helpers.
+*/
 &ocp {
     P9_42_pinmux { status = "disabled"; };
 };
 
 &bone_uart_3 {
+    // See these files for more info
+    // https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/bbai-bone-buses.dtsi
+    // https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/bbb-bone-buses.dtsi
     status = "okay";
 };
