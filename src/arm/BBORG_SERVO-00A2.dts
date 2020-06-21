@@ -79,14 +79,14 @@
         compatible = "nxp,pca9685-pwm";
         #pwm-cells = <16>;
         reg = <0x70>;
-        lable = "pca9685_servo";
+        label = "pca9685_servo";
         /* invert; */
         /* open-drain; */
     };
 };
 
 &{/} {
-    leds {
+    pca9685 {
         pinctrl-names = "default";
         pinctrl-0 = <&bborg_servo_pca9685_en_pins>;
 
