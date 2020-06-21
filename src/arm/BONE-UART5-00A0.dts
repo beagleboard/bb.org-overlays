@@ -29,7 +29,7 @@
 };
 
 &bone_uart_5 {
-    // See these files for more info
+    // See these files for the definition
     // https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/bbai-bone-buses.dtsi
     // https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/bbb-bone-buses.dtsi
     status = "okay";
