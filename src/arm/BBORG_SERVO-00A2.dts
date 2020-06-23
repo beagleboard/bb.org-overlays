@@ -52,7 +52,7 @@
     };
 
 
-    bborg_servo_pca9685_i2c_pins: pinmux_bborg_servo_pca9685_i2c_pins {
+    bborg_i2c_pins: pinmux_bborg_i2c_pins {
         pinctrl-single,pins = <
             BONE_P9_20 (SLEWCTRL_SLOW | PIN_INPUT_PULLUP | MUX_MODE3)    /* P9_19: i2c2.sda */
             BONE_P9_19 (SLEWCTRL_SLOW | PIN_INPUT_PULLUP | MUX_MODE3)    /* P9_20: i2c2.scl */
@@ -69,7 +69,7 @@
 
 &i2c2 {
     pinctrl-names = "default";
-    pinctrl-0 = <&bborg_servo_pca9685_i2c_pins>;
+    pinctrl-0 = <&bborg_i2c_pins>;
     status = "okay";
     clock-frequency = <100000>;
     #address-cells = <1>;
@@ -77,7 +77,7 @@
 
     pca: pca@70 {
         compatible = "nxp,pca9685-pwm";
-        #pwm-cells = <16>;
+        #pwm-cells = <2>;
         reg = <0x70>;
         label = "pca9685_servo";
         /* invert; */
