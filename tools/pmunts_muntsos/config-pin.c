@@ -67,12 +67,13 @@ static int RunShellCmd(char *cmd, char *buff, const int BUFF_SIZE) {
   return status;
 }
 
+// Returns -1 if fails
 static int GetGpio(char *pin) {
   char cmd[255];
   char pin_name[255];
   char chip[255];
   char gpio_chip[255];
-  int gpio;
+  int gpio, status;
 
   fixup_pin_name(pin);
 
@@ -80,7 +81,10 @@ static int GetGpio(char *pin) {
   strcpy(cmd, "gpioinfo | grep ");
   strcat(cmd, pin);
   strcat(cmd, " -m 1 | awk '{print substr($3,2,length($3) - 2)}'");
-  RunShellCmd(cmd, pin_name, 255);
+  status = RunShellCmd(cmd, pin_name, 255);
+
+  if(status == -1 || pin_name[0] == '\0') // Check for error or empty string (meaning pin could not be found)
+    return -1;
 
   // Get GPIO chip
   strcpy(cmd, "gpiofind ");
@@ -88,11 +92,17 @@ static int GetGpio(char *pin) {
   strcat(cmd, " | awk '{print substr($1,9)}'");
   RunShellCmd(cmd, chip, 255);
 
+  if(status == -1 || chip[0] == '\0') // Check for error or empty string (meaning pin could not be found)
+    return -1;
+
   // Get GPIO number on chip
   strcpy(cmd, "gpiofind ");
   strcat(cmd, pin_name);
   strcat(cmd, " | awk '{print $2}'");
   RunShellCmd(cmd, gpio_chip, 255);
+
+  if(status == -1 || gpio_chip[0] == '\0') // Check for error or empty string (meaning pin could not be found)
+    return -1;
 
   // Calculate sysfs GPIO number
   gpio = atoi(chip) * 32 + atoi(gpio_chip);
