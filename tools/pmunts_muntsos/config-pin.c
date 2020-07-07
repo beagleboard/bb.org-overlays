@@ -211,6 +211,7 @@ static void ConfigureMode(char *pin, char *mode, bool quiet)
   char filename[MAXPATHLEN];
   int sf;
   ssize_t len;
+  bool inout = !strcmp(mode, "out") || !strcmp(mode, "in");
 
   // Sanitize the pin name parameter
 
@@ -231,7 +232,7 @@ static void ConfigureMode(char *pin, char *mode, bool quiet)
 
   // Read the current mode file
 
-  len = write(sf, mode, strlen(mode));
+  len = inout ? write(sf, "gpio", strlen("gpio")) : write(sf, mode, strlen(mode));
   if (len < 0)
   {
     fprintf(stderr, "ERROR: write() to %s failed, %s\n", filename,
@@ -241,7 +242,7 @@ static void ConfigureMode(char *pin, char *mode, bool quiet)
 
   // Display the current mode
 
-  if (!quiet) printf("\nCurrent mode for %s is:     %s\n\n", pin, mode);
+  if (!quiet) printf("\nCurrent mode for %s is:     %s\n\n", pin, inout ? "gpio" : mode);
 
   // Close the current mode file
 
