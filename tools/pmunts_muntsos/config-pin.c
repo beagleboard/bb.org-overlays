@@ -34,6 +34,7 @@
 
 #define NAMES		"/sys/firmware/devicetree/base/ocp/%s_pinmux/pinctrl-names"
 #define STATE		"/sys/devices/platform/ocp/ocp:%s_pinmux/state"
+#define DIRECTION "/sys/class/gpio/gpio%d/direction"
 #define DELIMITERS	" \t\r\n"
 
 static void fixup_pin_name(char *s)
@@ -206,6 +207,39 @@ static void QueryMode(char *pin)
   close(sf);
 }
 
+static void ConfigDir(int gpio, char *dir) {
+  char filename[MAXPATHLEN];
+  int df;
+  ssize_t len;
+
+  memset(filename, 0, sizeof(filename));
+  snprintf(filename, sizeof(filename), DIRECTION, gpio);
+
+  // Open the current direction file
+
+  df = open(filename, O_WRONLY);
+  if (df < 1)
+  {
+    fprintf(stderr, "ERROR: open() for %s failed, %s\n", filename,
+      strerror(errno));
+    exit(1);
+  }
+
+  // Write to current direction file
+
+  len = write(df, dir, strlen(dir));
+  if (len < 0)
+  {
+    fprintf(stderr, "ERROR: write() to %s failed, %s\n", filename,
+      strerror(errno));
+    exit(1);
+  }
+
+  // Close the current direction file
+
+  close(df);
+}
+
 static void ConfigureMode(char *pin, char *mode, bool quiet)
 {
   char filename[MAXPATHLEN];
@@ -247,6 +281,17 @@ static void ConfigureMode(char *pin, char *mode, bool quiet)
   // Close the current mode file
 
   close(sf);
+
+  // Update GPIO direction (if applicable)
+
+  if(inout) {
+    int gpio = GetGpio(pin);
+
+    if(gpio == -1)
+      fprintf(stderr, "ERROR: Could not find GPIO number for pin %s", pin);
+    else
+      ConfigDir(gpio, mode);
+  }
 }
 
 static void ConfigFile(char *filename)
