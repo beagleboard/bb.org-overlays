@@ -78,6 +78,15 @@ static int GetGpio(char *pin) {
 
   fixup_pin_name(pin);
 
+  // Ensure pin name is valid (prevent OS injections)
+  // Must have format P[0-9]_[0-9][0-9]
+  if(strlen(pin) != 5 || pin[0] != 'P' || !isdigit(pin[1]) || pin[2] != '_' || !isdigit(pin[3]) || !isdigit(pin[4]))
+  {
+    fprintf(stderr, "WARNING: invalid pin name, %s", pin,
+    strerror(errno));
+    return -1;
+  }
+
   // Get pin name
   strcpy(cmd, "gpioinfo | grep ");
   strcat(cmd, pin);
