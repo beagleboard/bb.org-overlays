@@ -49,6 +49,56 @@ static void fixup_pin_name(char *s)
   }
 }
 
+// Only stores the first line of cmd's output
+// Returns -1 if fails
+static int RunShellCmd(char *cmd, char *buff, const int BUFF_SIZE) {
+  FILE *fp;
+  int status;
+
+  fp = popen(cmd, "r");
+  if(fp == NULL)
+    return -1;
+  
+  fgets(buff, BUFF_SIZE, fp);
+  strtok(buff, "\n"); // Remove newline
+
+  status = pclose(fp);
+
+  return status;
+}
+
+static int GetGpio(char *pin) {
+  char cmd[255];
+  char pin_name[255];
+  char chip[255];
+  char gpio_chip[255];
+  int gpio;
+
+  fixup_pin_name(pin);
+
+  // Get pin name
+  strcpy(cmd, "gpioinfo | grep ");
+  strcat(cmd, pin);
+  strcat(cmd, " -m 1 | awk '{print substr($3,2,length($3) - 2)}'");
+  RunShellCmd(cmd, pin_name, 255);
+
+  // Get GPIO chip
+  strcpy(cmd, "gpiofind ");
+  strcat(cmd, pin_name);
+  strcat(cmd, " | awk '{print substr($1,9)}'");
+  RunShellCmd(cmd, chip, 255);
+
+  // Get GPIO number on chip
+  strcpy(cmd, "gpiofind ");
+  strcat(cmd, pin_name);
+  strcat(cmd, " | awk '{print $2}'");
+  RunShellCmd(cmd, gpio_chip, 255);
+
+  // Calculate sysfs GPIO number
+  gpio = atoi(chip) * 32 + atoi(gpio_chip);
+  return gpio;
+}
+
 static void ListModes(char *pin)
 {
   char filename[MAXPATHLEN];
