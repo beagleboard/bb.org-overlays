@@ -71,9 +71,9 @@ static int RunShellCmd(char *cmd, char *buff, const int BUFF_SIZE) {
 // Returns -1 if fails
 static int GetGpio(char *pin) {
   char cmd[255];
-  char pin_name[255];
-  char chip[255];
-  char gpio_chip[255];
+  char pin_name[32];
+  char chip[2];
+  char gpio_chip[3];
   int gpio, status;
 
   fixup_pin_name(pin);
@@ -91,7 +91,7 @@ static int GetGpio(char *pin) {
   strcpy(cmd, "gpioinfo | grep ");
   strcat(cmd, pin);
   strcat(cmd, " -m 1 | awk '{print substr($3,2,length($3) - 2)}'");
-  status = RunShellCmd(cmd, pin_name, 255);
+  status = RunShellCmd(cmd, pin_name, sizeof(pin_name));
 
   if(status == -1 || pin_name[0] == '\0') // Check for error or empty string (meaning pin could not be found)
     return -1;
@@ -100,7 +100,7 @@ static int GetGpio(char *pin) {
   strcpy(cmd, "gpiofind ");
   strcat(cmd, pin_name);
   strcat(cmd, " | awk '{print substr($1,9)}'");
-  RunShellCmd(cmd, chip, 255);
+  RunShellCmd(cmd, chip, sizeof(chip));
 
   if(status == -1 || chip[0] == '\0') // Check for error or empty string (meaning pin could not be found)
     return -1;
@@ -109,7 +109,7 @@ static int GetGpio(char *pin) {
   strcpy(cmd, "gpiofind ");
   strcat(cmd, pin_name);
   strcat(cmd, " | awk '{print $2}'");
-  RunShellCmd(cmd, gpio_chip, 255);
+  RunShellCmd(cmd, gpio_chip, sizeof(gpio_chip));
 
   if(status == -1 || gpio_chip[0] == '\0') // Check for error or empty string (meaning pin could not be found)
     return -1;
