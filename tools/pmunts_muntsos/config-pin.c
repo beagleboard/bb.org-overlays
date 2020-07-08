@@ -254,7 +254,13 @@ static void ConfigureMode(char *pin, char *mode, bool quiet)
   char filename[MAXPATHLEN];
   int sf;
   ssize_t len;
-  bool inout = !strcmp(mode, "out") || !strcmp(mode, "in");
+  bool inout = !strcmp(mode, "out") || !strcmp(mode, "output") || !strcmp(mode, "in") || !strcmp(mode, "input");
+
+  // Allow for both in/out and input/output
+
+  mode = !strcmp(mode, "output") ? "out" : mode;
+  mode = !strcmp(mode, "input") ? "in" : mode;
+
 
   // Sanitize the pin name parameter
 
