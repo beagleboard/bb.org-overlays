@@ -79,7 +79,8 @@ static int GetGpio(char *pin) {
   fixup_pin_name(pin);
 
   // Ensure pin name is valid (prevent OS injections)
-  // Must have format P[0-9]_[0-9][0-9]
+  // (must have format P[0-9]_[0-9][0-9])
+
   if(strlen(pin) != 5 || pin[0] != 'P' || !isdigit(pin[1]) || pin[2] != '_' || !isdigit(pin[3]) || !isdigit(pin[4]))
   {
     fprintf(stderr, "WARNING: invalid pin name, %s", pin,
@@ -88,6 +89,7 @@ static int GetGpio(char *pin) {
   }
 
   // Get pin name
+
   strcpy(cmd, "gpioinfo | grep ");
   strcat(cmd, pin);
   strcat(cmd, " -m 1 | awk '{print substr($3,2,length($3) - 2)}'");
@@ -97,6 +99,7 @@ static int GetGpio(char *pin) {
     return -1;
 
   // Get GPIO chip
+
   strcpy(cmd, "gpiofind ");
   strcat(cmd, pin_name);
   strcat(cmd, " | awk '{print substr($1,9)}'");
@@ -106,6 +109,7 @@ static int GetGpio(char *pin) {
     return -1;
 
   // Get GPIO number on chip
+
   strcpy(cmd, "gpiofind ");
   strcat(cmd, pin_name);
   strcat(cmd, " | awk '{print $2}'");
@@ -115,6 +119,7 @@ static int GetGpio(char *pin) {
     return -1;
 
   // Calculate sysfs GPIO number
+
   gpio = atoi(chip) * 32 + atoi(gpio_chip);
   return gpio;
 }
@@ -260,7 +265,6 @@ static void ConfigureMode(char *pin, char *mode, bool quiet)
 
   mode = !strcmp(mode, "output") ? "out" : mode;
   mode = !strcmp(mode, "input") ? "in" : mode;
-
 
   // Sanitize the pin name parameter
 
