@@ -71,8 +71,9 @@ static int RunShellCmd(char *cmd, char *buff, const int BUFF_SIZE) {
 // Returns -1 if fails
 static int GetGpio(char *pin) {
   char cmd[255];
+  char cmdout[255];
+  char *temp_pin_name;
   char pin_name[32];
-  char gpiofind[32];
   char chip;
   char gpio_chip[3];
   int gpio, status;
@@ -89,32 +90,41 @@ static int GetGpio(char *pin) {
     return -1;
   }
 
-  // Get pin name
+  // Run gpioinfo [pin]
 
   strcpy(cmd, "gpioinfo | grep ");
   strcat(cmd, pin);
-  strcat(cmd, " -m 1 | awk '{print substr($3,2,length($3) - 2)}'");
-  status = RunShellCmd(cmd, pin_name, sizeof(pin_name));
+  strcat(cmd, " -m 1");
+  status = RunShellCmd(cmd, cmdout, sizeof(cmdout));
 
-  if(status == -1 || pin_name[0] == '\0') // Check for error or empty string (meaning pin could not be found)
+  if(status == -1 || cmdout[0] == '\0') // Check for error or empty string (meaning pin could not be found)
     return -1;
 
-  // Get chip/GPIO info
+  // Get pin name (parse gpioinfo output)
+
+  strtok(cmdout, " ");
+  strtok(NULL, " ");
+  temp_pin_name = strtok(NULL, " "); // Pin name is the third word of gpioinfo output
+  
+  strncpy(pin_name, temp_pin_name + 1, strlen(temp_pin_name) - 1); // Remove quotes surrounding pin name
+  pin_name[strlen(temp_pin_name) - 2] = '\0'; // Need to manually add null terminator with strncpy
+
+  // Run gpiofind [pin_name]
 
   strcpy(cmd, "gpiofind ");
   strcat(cmd, pin_name);
-  RunShellCmd(cmd, gpiofind, sizeof(gpiofind));
+  RunShellCmd(cmd, cmdout, sizeof(cmdout));
 
-  if(status == -1 || gpiofind[0] == '\0') // Check for error or empty string (meaning pin could not be found)
+  if(status == -1 || cmdout[0] == '\0') // Check for error or empty string (meaning pin could not be found)
     return -1;
 
   // Get GPIO chip (parse gpiofind output)
 
-  chip = gpiofind[8];
+  chip = cmdout[8];
 
   // Get GPIO number on chip (parse gpiofind output)
 
-  strtok(gpiofind, " "); // Split gpiofind output at space
+  strtok(cmdout, " "); // Split gpiofind output at space
   strcpy(gpio_chip, strtok(NULL, " "));
 
   // Calculate sysfs GPIO number
