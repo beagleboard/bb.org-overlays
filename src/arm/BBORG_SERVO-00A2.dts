@@ -9,10 +9,6 @@
 /dts-v1/;
 /plugin/;
 
-#include <dt-bindings/board/am335x-bbw-bbb-base.h>
-#include <dt-bindings/gpio/gpio.h>
-#include <dt-bindings/pinctrl/am33xx.h>
-
 /*
  * Helper to show loaded overlays under: /proc/device-tree/chosen/overlays/
  */
@@ -38,42 +34,31 @@
     P8_10_pinmux { status = "disabled"; };	/* pca9685.enable */
 };
 
-&am33xx_pinmux {
+/*
+ * Enable and Update the default state of the pins
+ * For pinctrl-0 values see these file
+ * BeagleBoard-DeviceTrees/src/arm/am572x-bone-common-univ.dtsi
+ * BeagleBoard-DeviceTrees/src/arm/am335x-bone-common-univ.dtsi
+ */
+&ocp {
+    P8_12_pinmux { status = "okay"; pinctrl-0 = <&P8_12_gpio_input_pin>; }; /* IN1 */
+    P8_11_pinmux { status = "okay"; pinctrl-0 = <&P8_11_gpio_input_pin>; }; /* IN2 */
+    P9_30_pinmux { status = "okay"; pinctrl-0 = <&P9_30_gpio_input_pin>; }; /* IN3 */
+    P9_27_pinmux { status = "okay"; pinctrl-0 = <&P9_27_gpio_input_pin>; }; /* IN4 */
+    P9_41_pinmux { status = "okay"; pinctrl-0 = <&P9_41_gpio_input_pin>; }; /* IN5 */
+    P9_42_pinmux { status = "okay"; pinctrl-0 = <&P9_42_gpio_input_pin>; }; /* IN6 */
 
-    bborg_servo_input_pins: pinmux_bborg_servo_input_pins {
-        pinctrl-single,pins = <
-            BONE_P8_12 (PIN_INPUT_PULLDOWN | MUX_MODE7)    /* P8_12: gpio1_12 */
-            BONE_P8_11 (PIN_INPUT_PULLDOWN | MUX_MODE7)    /* P8_11: gpio1_13 */
-            BONE_P9_30 (PIN_INPUT_PULLDOWN | MUX_MODE7)    /* P9_30: gpio3_16 */
-            BONE_P9_27 (PIN_INPUT_PULLDOWN | MUX_MODE7)    /* P9_27: gpio3_19 */
-            BONE_P9_41 (PIN_INPUT_PULLDOWN | MUX_MODE7)    /* P9_41: gpio3_20 */
-            BONE_P9_42 (PIN_INPUT_PULLDOWN | MUX_MODE7)    /* P9_42: gpio0_7 */
-        >;
-    };
-
-
-    bborg_i2c_pins: pinmux_bborg_i2c_pins {
-        pinctrl-single,pins = <
-            BONE_P9_20 (SLEWCTRL_SLOW | PIN_INPUT_PULLUP | MUX_MODE3)    /* P9_19: i2c2.sda */
-            BONE_P9_19 (SLEWCTRL_SLOW | PIN_INPUT_PULLUP | MUX_MODE3)    /* P9_20: i2c2.scl */
-        >;
-    };
-
-
-    bborg_servo_pca9685_en_pins: pinmux_bborg_servo_pca9685_en_pins {
-        pinctrl-single,pins = <
-            BONE_P8_10 (PIN_OUTPUT_PULLDOWN | MUX_MODE7)    /* P9_20: servo.en */
-        >;
-    };
+    P9_19_pinmux { status = "okay"; pinctrl-0 = <&P9_19_i2c_pin>; }; /* i2c_scl */
+    P9_20_pinmux { status = "okay"; pinctrl-0 = <&P9_20_i2c_pin>; }; /* i2c_sda */
+    P8_10_pinmux { status = "okay"; pinctrl-0 = <&P8_10_gpio_pin>; }; /* pca9685.enable */
 };
 
-&i2c2 {
-    pinctrl-names = "default";
-    pinctrl-0 = <&bborg_i2c_pins>;
-    status = "okay";
-    clock-frequency = <100000>;
-    #address-cells = <1>;
-    #size-cells = <0>;
+&bone_i2c_2 {
+    // bone_i2c_2 is enabled by default on BBB and BBAI for cape EEPROM
+    // status = "okay";
+    // clock-frequency = <100000>;
+    // #address-cells = <1>;
+    // #size-cells = <0>;
 
     pca: pca@70 {
         compatible = "nxp,pca9685-pwm";
@@ -86,16 +71,13 @@
 };
 
 &{/} {
-    pca9685 {
-        pinctrl-names = "default";
-        pinctrl-0 = <&bborg_servo_pca9685_en_pins>;
-
-        compatible = "gpio-leds";
-
-        pca9685-enable {
+    leds {
+        led_P8_10 {
+            status = "okay";
             label = "pca9685-enable";
-            gpios = <&gpio2 4 GPIO_ACTIVE_LOW>;
-            default-state = "on";
+            // pca9685 Chip enable is ACTIVE-LOW but LEDs are set to ACTIVE-HIGH
+            // Set default-state to "off" to enable the pca9685 chip by default.
+            default-state = "off";
         };
     };
 };
