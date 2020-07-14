@@ -1,7 +1,9 @@
 /*
  * Copyright (C) 2020 Deepak Khatri <deepaklorkhatri7@gmail.com>
- *
+ *  
  * Based on BBORG_MOTOR-00A2.dts from Robert Nelson for kernel <4.14
+ * Copyright (C) 2018 Robert Nelson <robertcnelson@gmail.com>
+ *
  * Note: Requires Compaibility code from BeagleBoard-DeviceTrees/pull/17
  *
  * This program is free software; you can redistribute it and/or modify
