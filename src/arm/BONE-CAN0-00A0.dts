@@ -1,0 +1,36 @@
+/*
+ * Copyright (C) 2020 Deepak Khatri <deepaklorkhatri7@gmail.com>
+ *
+ * Virtual cape for /dev/bone/can/0 (only on BBB)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+/dts-v1/;
+/plugin/;
+
+/*
+* Helper to show loaded overlays under: /proc/device-tree/chosen/overlays/
+*/
+&{/chosen} {
+    overlays {
+        BONE-CAN0-00A0.dts = __TIMESTAMP__;
+    };
+};
+
+/*
+* Update the default pinmux of the pins.
+*/
+&ocp {
+    P9_19_pinmux { pinctrl-0 = <&P9_19_can_pin>;};  /* can rx */
+    P9_20_pinmux { pinctrl-0 = <&P9_20_can_pin>;};  /* can tx */
+};
+
+&bone_can_0 {
+    // See these files for the definition
+    // https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/bbai-bone-buses.dtsi
+    // https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/bbb-bone-buses.dtsi
+    status = "okay";
+};
