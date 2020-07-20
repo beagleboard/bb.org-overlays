@@ -24,11 +24,11 @@
 };
 
 /*
-* Free up the pins used by the cape from the pinmux helpers.
+* Update the default pinmux of the pins
 */
 &ocp {
-    P9_18_pinmux { status = "disabled"; };
-    P9_17_pinmux { status = "disabled"; };
+    P9_18_pinmux { pinctrl-0 = <&P9_18_i2c_pin>; }; /* i2c sda */
+    P9_17_pinmux { pinctrl-0 = <&P9_17_i2c_pin>; }; /* i2c scl */
 };
 
 &bone_i2c_1 {
