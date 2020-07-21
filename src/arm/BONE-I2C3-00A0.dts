@@ -24,16 +24,21 @@
 };
 
 /*
-* Update the default pinmux of the pins.
-*/
+ * Update the default pinmux of the pins.
+ * See these files for the phandles (&P9_* & &P8_*)
+ * https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/am335x-bone-common-univ.dtsi
+ * https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/am572x-bone-common-univ.dtsi
+ */
 &ocp {
     P9_26_pinmux { pinctrl-0 = <&P9_26_i2c_pin>;};  /* i2c sda */
     P9_24_pinmux { pinctrl-0 = <&P9_24_i2c_pin>;};  /* i2c scl */
 };
 
+/*
+ * See these files for the phandles (&bone_*) and other bone bus nodes
+ * https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/bbai-bone-buses.dtsi
+ * https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/bbb-bone-buses.dtsi
+ */
 &bone_i2c_3 {
-    // See these files for the definition
-    // https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/bbai-bone-buses.dtsi
-    // https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/bbb-bone-buses.dtsi
     status = "okay";
 };
