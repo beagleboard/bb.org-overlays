@@ -21,16 +21,21 @@
 };
 
 /*
-* Update the default pinmux of the pins.
-*/
+ * Update the default pinmux of the pins.
+ * See these files for the phandles (&P9_* & &P8_*)
+ * https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/am335x-bone-common-univ.dtsi
+ * https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/am572x-bone-common-univ.dtsi
+ */
 &ocp {
     P9_14_pinmux { pinctrl-0 = <&P9_14_pwm_pin>; };    /* PWM A */
     P9_16_pinmux { pinctrl-0 = <&P9_16_pwm_pin>; };    /* PWM B */
 };
 
-// See these files for the definition
-// https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/bbai-bone-buses.dtsi
-// https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/bbb-bone-buses.dtsi
+/*
+ * See these files for the phandles (&bone_*) and other bone bus nodes
+ * https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/bbai-bone-buses.dtsi
+ * https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/bbb-bone-buses.dtsi
+ */
 &bone_pwmss_1 {
     status = "okay";
 };
