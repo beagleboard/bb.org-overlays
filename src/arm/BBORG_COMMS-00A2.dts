@@ -1,8 +1,10 @@
 /*
+ * Copyright (C) 2020 Deepak Khatri <deepaklorkhatri7@gmail.com>
+ *
+ * Based on older BBORG_COMMS-00A2.dts for kernel <4.14x
  * Copyright (C) 2012,2019 Texas Instruments Incorporated - http://www.ti.com/
  * Copyright (C) 2015 Robert Nelson <robertcnelson@gmail.com>
  * Copyright (C) 2015 Sebastian Jegerås
- * Copyright (C) 2020, Deepak Khatri <deepaklorkhatri7@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -12,13 +14,9 @@
 /dts-v1/;
 /plugin/;
 
-#include <dt-bindings/board/am335x-bbw-bbb-base.h>
-#include <dt-bindings/pinctrl/am33xx.h>
-#include <dt-bindings/gpio/gpio.h>
-
 /*
-* Helper to show loaded overlays under: /proc/device-tree/chosen/overlays/
-*/
+ * Helper to show loaded overlays under: /proc/device-tree/chosen/overlays/
+ */
 &{/chosen} {
 	overlays {
 		BBORG_COMMS-00A2 = __TIMESTAMP__;
@@ -26,70 +24,45 @@
 };
 
 /*
-* Free up the pins used by the cape from the pinmux helpers.
-*/
+ * Update the default pinmux of the pins.
+ * See these files for the phandles (&P9_* & &P8_*)
+ * https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/am335x-bone-common-univ.dtsi
+ * https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/am572x-bone-common-univ.dtsi
+ */
 &ocp {
-	P9_24_pinmux { status = "disabled"; };	/* P9_24: uart1_txd.d_can1_rx */
-	P9_26_pinmux { status = "disabled"; };	/* P9_26: uart1_rxd.d_can1_tx */
-	P9_13_pinmux { status = "disabled"; };	/* P9_13: gpmc_wpn.uart4_txd_mux2 */
-	P9_11_pinmux { status = "disabled"; };	/* P9_11: gpmc_wait0.uart4_rxd_mux2 */
-	P9_15_pinmux { status = "disabled"; };	/* P9_15: gpmc_a0.gpio1_16 */
-	P9_23_pinmux { status = "disabled"; };	/* P9_23: gpmc_a1.gpio1_17 */
+	P9_24_pinmux { pinctrl-0 = <&P9_24_can_pin>; }; /* CAN TX */
+	P9_26_pinmux { pinctrl-0 = <&P9_26_can_pin>; }; /* CAN TX */
+	P9_13_pinmux { pinctrl-0 = <&P9_13_uart_pin>; }; /* UART TX */
+	P9_11_pinmux { pinctrl-0 = <&P9_11_uart_pin>; }; /* UART RX */
+	P9_15_pinmux { pinctrl-0 = <&P9_15_gpio_pin>; }; /* GPIO: SINK A*/
+	P9_23_pinmux { pinctrl-0 = <&P9_23_gpio_pin>; }; /* GPIO: SINK B */
 };
 
-&am33xx_pinmux {
-	bborg_comms_can_pins: pinmux_comms_can_pins {
-		pinctrl-single,pins = <
-			BONE_P9_24 (PIN_INPUT_PULLUP | MUX_MODE2)	/* P9_24: uart1_txd.d_can1_rx */
-			BONE_P9_26 (PIN_OUTPUT_PULLUP | MUX_MODE2)	/* P9_26: uart1_rxd.d_can1_tx */
-		>;
-	};
-	bborg_comms_rs485_pins: pinmux_comms_rs485_pins {
-		pinctrl-single,pins = <
-			BONE_P9_13 (PIN_OUTPUT | MUX_MODE6)	/* P9_13: gpmc_wpn.uart4_txd_mux2 */
-			BONE_P9_11 (PIN_INPUT  | MUX_MODE6)	/* P9_11: gpmc_wait0.uart4_rxd_mux2 */
-		>;
-	};
-	bborg_comms_sink_pins: pinmux_bborg_comms_sink_pins{
-		pinctrl-single,pins = <
-			BONE_P9_15 (PIN_OUTPUT_PULLDOWN | MUX_MODE7)	/* P9_15: gpmc_a0.gpio1_16 */
-			BONE_P9_23 (PIN_OUTPUT_PULLDOWN | MUX_MODE7)	/* P9_23: gpmc_a1.gpio1_17 */
-		>;
-	};
-};
-
-&dcan1 {
+/*
+ * See these files for the phandles (&bone_*) and nodes
+ * https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/bbai-bone-buses.dtsi
+ * https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/bbb-bone-buses.dtsi
+ */
+&bone_can_1 {
 	status = "okay";
-	pinctrl-names = "default";
-	pinctrl-0 = <&bborg_comms_can_pins>;
 };
 	
-&uart4 {
+&bone_uart_4 {
 	status = "okay";
-	pinctrl-names = "default";
-	pinctrl-0 = <&bborg_comms_rs485_pins>;
-	//rs485-rts-delay = <0 0>;
-	//rts-gpio = <&gpio3 19 1>; /*  GPIO_ACTIVE_HIGH>; */
-	//rs485-rts-active-high;
-	//linux,rs485-enabled-at-boot-time;
 };
 
 &{/} {
-
-	sinks {
-		pinctrl-names = "default";
-		pinctrl-0 = <&bborg_comms_sink_pins>;
-		compatible = "gpio-leds";
-
-		sink@1 {
+	leds {
+		// SINK A
+		led_P9_15 {
+			status = "okay";
 			label = "Sink_A";
-			gpios = <&gpio1 16 GPIO_ACTIVE_HIGH>;
 			default-state = "off";
 		};
-
-		sink@2 {
+		// SINK B
+		led_P9_23 {
+			status = "okay";
 			label = "Sink_B";
-			gpios = <&gpio1 17 GPIO_ACTIVE_HIGH>;
 			default-state = "off";
 		};
 	};
