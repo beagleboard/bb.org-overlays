@@ -21,8 +21,11 @@
 };
 
 /*
-* Free up the pins used by the cape from the pinmux helpers.
-*/
+ * Update the default pinmux of the pins.
+ * See these files for the phandles (&P9_* & &P8_*)
+ * https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/am335x-bone-common-univ.dtsi
+ * https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/am572x-bone-common-univ.dtsi
+ */
 &ocp {
     P9_28_pinmux { pinctrl-0 = <&P9_28_spi_cs_pin>; }; /* CS */
     P9_30_pinmux { pinctrl-0 = <&P9_30_spi_pin>; }; /* MOSI */
@@ -30,10 +33,12 @@
     P9_31_pinmux { pinctrl-0 = <&P9_31_spi_sclk_pin>; }; /* CLK */
 };
 
+/*
+ * See these files for the phandles (&bone_*) and other bone bus nodes
+ * https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/bbai-bone-buses.dtsi
+ * https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/bbb-bone-buses.dtsi
+ */
 &bone_spi_1_0 {
-    // See these files for the definition
-    // https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/bbai-bone-buses.dtsi
-    // https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/bbb-bone-buses.dtsi
     status = "okay";
     spi-max-frequency = <16000000>;
 	spi-cpha;
