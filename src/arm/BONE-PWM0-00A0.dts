@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2020 Deepak Khatri <deepaklorkhatri7@gmail.com>
  *
- * Virtual cape for /dev/bone/pwm/0 (only on BBBWL/BBB)
+ * Virtual cape for /dev/pwm/ehrpwm0a & /dev/pwm/ehrpwm0a (only on BBBWL/BBB)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
