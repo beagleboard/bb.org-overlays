@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2020 Deepak Khatri <deepaklorkhatri7@gmail.com>
  *
- * Virtual cape for /bone/uart/2
+ * Virtual cape for /dev/bone/uart/2
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -21,11 +21,11 @@
 };
 
 /*
-* Free up the pins used by the cape from the pinmux helpers.
+* Update the default pinmux of the pins.
 */
 &ocp {
-    P9_21_pinmux { status = "disabled"; };
-    P9_22_pinmux { status = "disabled"; };
+    P9_21_pinmux { pinctrl-0 = <&P9_21_uart_pin>; };    /* UART TX*/
+    P9_22_pinmux { pinctrl-0 = <&P9_22_uart_pin>; };    /* UART RX*/
 };
 
 &bone_uart_2 {

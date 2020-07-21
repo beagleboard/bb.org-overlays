@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2020 Deepak Khatri <deepaklorkhatri7@gmail.com>
  *
- * Virtual cape for /bone/uart/3 (only on BBB)
+ * Virtual cape for /dev/bone/uart/3 (only on BBB)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -21,10 +21,10 @@
 };
 
 /*
-* Free up the pins used by the cape from the pinmux helpers.
+* Update the default pinmux of the pins.
 */
 &ocp {
-    P9_42_pinmux { status = "disabled"; };
+    P9_42_pinmux { pinctrl-0 = <&P9_42_uart_pin>; };    /*UART TX*/
 };
 
 &bone_uart_3 {
