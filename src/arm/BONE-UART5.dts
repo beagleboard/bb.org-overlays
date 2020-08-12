@@ -27,8 +27,8 @@
  * https://github.com/lorforlinux/BeagleBoard-DeviceTrees/blob/compatibility/src/arm/am572x-bone-common-univ.dtsi
  */
 &ocp {
-    P9_37_pinmux { pinctrl-0 = <&P9_37_uart_pin>; };    /* UART TX*/
-    P9_38_pinmux { pinctrl-0 = <&P9_38_uart_pin>; };    /* UART RX*/
+    P8_37_pinmux { pinctrl-0 = <&P8_37_uart_pin>; };    /* UART TX*/
+    P8_38_pinmux { pinctrl-0 = <&P8_38_uart_pin>; };    /* UART RX*/
 };
 
 /*
