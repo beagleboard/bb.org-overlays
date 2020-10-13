@@ -1,0 +1,132 @@
+/*
+ * Copyright (c) 2020 Seeed Studio
+ *                    Peter Yang <turmary@126.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ *
+ * CC2520 cape using
+ *   SPI0 on connector pins P9.22 P9.21 P9.18 P9.17
+ *   and 6 GPIOS.
+ *
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/board/am335x-bbw-bbb-base.h>
+#include <dt-bindings/pinctrl/am33xx.h>
+
+/ {
+	compatible = "ti,beaglebone", "ti,beaglebone-black", "ti,beaglebone-green";
+
+	/* identification */
+	part-number = "BB-SPI0-CC2520";
+	version = "00A0";
+
+	/* state the resources this cape uses */
+	exclusive-use =
+		/* the pin header uses, am335x, cc2520 */
+		"P9.17",	/* spi0_cs0,  ncs */
+		"P9.18",	/* spi0_d1,   mosi */
+		"P9.21",	/* spi0_d0,   miso */
+		"P9.22",	/* spi0_sclk, sck */
+
+		"P8.11",	/* gpio1_13,  io2.fifop */
+		"P8.12",	/* gpio1_12,  io1.fifo  */
+		"P8.15",	/* gpio1_15,  io4.sfd   */
+		"P8.16",	/* gpio1_14,  io3.cca   */
+		"P9.12",	/* gpio1_28,  vreg_en */
+		"P9.23",	/* gpio1_17,  nRST */
+		/* the hardware ip uses */
+		"spi0";
+
+	/*
+	 * Free up the pins used by the cape from the pinmux helpers.
+	 */
+	fragment@0 {
+		target = <&ocp>;
+		__overlay__ {
+			P9_17_pinmux { status = "disabled"; };	/* spi0_cs0 */
+			P9_18_pinmux { status = "disabled"; };	/* spi0_d1 */
+			P9_21_pinmux { status = "disabled"; };	/* spi0_d0 */
+			P9_22_pinmux { status = "disabled"; };	/* spi0_sclk */
+
+			P8_11_pinmux { status = "disabled"; };	/* gpio1_13 */
+			P8_12_pinmux { status = "disabled"; };	/* gpio1_12 */
+			P8_15_pinmux { status = "disabled"; };	/* gpio1_15 */
+			P8_16_pinmux { status = "disabled"; };	/* gpio1_14 */
+			P9_12_pinmux { status = "disabled"; };	/* gpio1_28 */
+			P9_23_pinmux { status = "disabled"; };	/* gpio1_17 */
+		};
+	};
+
+	fragment@1 {
+		target = <&am33xx_pinmux>;
+		__overlay__ {
+			/* default state has all gpios released and mode set to spi0 */
+			bb_spi0_pins: pinmux_bb_spi0_pins {
+				pinctrl-single,pins = <
+					BONE_P9_17 (PIN_OUTPUT_PULLUP | MUX_MODE0)  /* spi0_cs0.spi0_cs0 */
+					BONE_P9_18 (PIN_OUTPUT_PULLUP | MUX_MODE0) /* spi0_d1.spi0_d1 */
+					BONE_P9_21 (PIN_INPUT_PULLUP | MUX_MODE0) /* spi0_d0.spi0_d0 */
+					BONE_P9_22 (PIN_INPUT_PULLUP | MUX_MODE0) /* spi0_sclk.spi0_sclk */
+				>;
+			};
+
+			bb_cc2520_0_pins: pinmux_bb_cc2520_0_pins {
+				pinctrl-single,pins = <
+					BONE_P8_11 (PIN_INPUT_PULLDOWN | MUX_MODE7) /* gpio1_13*/
+					BONE_P8_12 (PIN_INPUT_PULLDOWN | MUX_MODE7) /* gpio1_12*/
+					BONE_P8_15 (PIN_INPUT_PULLDOWN | MUX_MODE7) /* gpio1_15*/
+					BONE_P8_16 (PIN_INPUT_PULLDOWN | MUX_MODE7) /* gpio1_14*/
+					BONE_P9_12 (PIN_INPUT_PULLDOWN | MUX_MODE7) /* gpio1_28*/
+					BONE_P9_23 (PIN_INPUT_PULLDOWN | MUX_MODE7) /* gpio1_17*/
+				>;
+			};
+		};
+	};
+
+	fragment@2 {
+		target = <&spi0>;
+		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			status = "okay";
+			pinctrl-names = "default";
+			pinctrl-0 = <&bb_spi0_pins>;
+			/*
+			 * disable dma when used as an overlay,
+			 * dma gets stuck at 160 bits...
+			 */
+			ti,pio-mode;
+			/* ti,pindir-d0-out-d1-in; */
+
+			channel@0{ status = "disabled"; };
+			channel@1{ status = "disabled"; };
+
+			cc2520_0: cc2520@0 {
+				compatible = "ti,cc2520";
+				status = "okay";
+
+				reg = <0>;
+				spi-max-frequency = <4000000>;
+				/* spi-cpha; */ /* If present then clock-phase = 1, else = 0 */
+				/* spi-cpol; */ /* If present then clock-polarity = 1, else = 0 */
+
+				pinctrl-names = "default";
+				pinctrl-0 = <&bb_cc2520_0_pins>;
+				fifo-gpio  = <&gpio1 12 0>;
+				fifop-gpio = <&gpio1 13 0>;
+				cca-gpio   = <&gpio1 14 0>;
+				sfd-gpio   = <&gpio1 15 0>;
+				vreg-gpio  = <&gpio1 28 0>;
+				reset-gpio = <&gpio1 17 0>;
+				/* amplified; */
+			};
+		};
+	};
+};
+
