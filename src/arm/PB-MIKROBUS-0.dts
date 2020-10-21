@@ -66,6 +66,7 @@
 		target = <&uart4>;
 		__overlay__ {
 			status = "okay";
+			force-empty-serdev-controller;
 		};
 	};
 
@@ -126,7 +127,7 @@
 				i2c-adapter = <&i2c1>;
 				spi-master = <0>;
 				spi-cs = <0 1>;
-				serdev-controller = <&uart4>;
+				uart = <&uart4>;
 				pwms = <&ehrpwm1 0 500000 0>;
 				mikrobus-gpios = <&gpio1 18 0> , <&gpio0 23 0>,
 						 <&gpio0 30 0> , <&gpio0 31 0>,
