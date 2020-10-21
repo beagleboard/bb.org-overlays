@@ -1,0 +1,150 @@
+/*
+ * Copyright (C) 2020 Robert Nelson <robertcnelson@gmail.com>
+ * Copyright 2020 Vaishnav M A, BeagleBoard.org Foundation.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/am33xx.h>
+
+/ {
+
+	/*
+	 * Helper to show loaded overlays under: /proc/device-tree/chosen/overlays/
+	 */
+	fragment@0 {
+		target-path="/";
+		__overlay__ {
+
+			chosen {
+				overlays {
+					BB-MIKROBUS-CAPE-1 = __TIMESTAMP__;
+				};
+			};
+		};
+	};
+
+	/*
+	 * Free up the pins used by the mikrobus port from the pinmux helpers.
+	 * pins are listed in clockwise order of their appearance in the
+	 * mikrobus port.
+	 */
+	fragment@1 {
+		target = <&ocp>;
+		__overlay__ {			
+
+			P9_14_pinmux { status = "disabled"; };
+			P9_15_pinmux { status = "disabled"; };
+			P9_21_pinmux { status = "disabled"; };
+			P9_22_pinmux { status = "disabled"; };
+			P9_19_pinmux { status = "disabled"; };
+			P9_20_pinmux { status = "disabled"; };
+			P9_30_pinmux { status = "disabled"; };
+			P9_29_pinmux { status = "disabled"; };
+			P9_31_pinmux { status = "disabled"; };
+			P9_28_pinmux { status = "disabled"; };
+			P9_12_pinmux { status = "disabled"; };
+			P8_26_pinmux { status = "disabled"; };
+		};
+	};
+
+	fragment@2 {
+		target = <&am33xx_pinmux>;
+		__overlay__ {
+			mbc_spi1_pins: pinmux-mbc-spi1-pins {
+					pinctrl-single,pins = <
+						AM33XX_IOPAD(0x0990, PIN_INPUT | MUX_MODE3 ) /* P9_31 (A13) mcasp0_aclkx.spi1_sclk */
+						AM33XX_IOPAD(0x0994, PIN_INPUT | MUX_MODE3 ) /* P9_29 (B13) mcasp0_fsx.spi1_d0 */
+						AM33XX_IOPAD(0x0998, PIN_INPUT | MUX_MODE3 ) /* P9_30 (D12) mcasp0_axr0.spi1_d1 */
+					>;
+				};
+			};
+	};
+
+	fragment@3 {
+		target = <&spi1>;
+		__overlay__ {
+			status = "okay";
+			cs-gpios = <0>, <0>, <&gpio1 28 GPIO_ACTIVE_HIGH>, <&gpio1 17 GPIO_ACTIVE_HIGH>,
+				   <&gpio2 4 GPIO_ACTIVE_HIGH>, <&gpio1 14 GPIO_ACTIVE_HIGH>;
+			pinctrl-names = "default";
+			pinctrl-0 = <&mbc_spi1_pins>;
+			channel@0{ status = "disabled"; };
+			channel@1{ status = "disabled"; };
+		};
+	};
+
+	fragment@4 {
+		target = <&uart2>;
+		__overlay__ {
+			status = "okay";
+			force-empty-serdev-controller;
+		};
+	};
+
+	fragment@5 {
+		target-path="/";
+		__overlay__ {
+
+			aliases {
+				mikrobus1 = "/mikrobus-1";
+			};
+		};
+	};
+
+	fragment@6 {
+		target-path="/";
+		__overlay__ {
+			mikrobus-1 {
+				compatible = "linux,mikrobus";
+				status = "okay";
+				pinctrl-names = "default", "pwm_default", "pwm_gpio",
+						"uart_default", "uart_gpio", "i2c_default",
+						"i2c_gpio", "spi_default", "spi_gpio";
+				pinctrl-0 = <
+					&P9_15_gpio_input_pin
+					&P9_12_gpio_pin
+					&P8_26_gpio_pin
+				>;
+				pinctrl-1 = <&P9_14_pwm_pin>;
+				pinctrl-2 = <&P9_14_gpio_pin>;
+				/* Disable below if Cape UART/SPI Selectors are
+				 * in SPI Position
+				 */		
+				pinctrl-3 = <
+					&P9_21_uart_pin
+					&P9_22_uart_pin
+				>;
+				pinctrl-4 = <
+					&P9_21_gpio_pin
+					&P9_22_gpio_pin
+				>;				
+				pinctrl-5 = <>;/*hack, will be fixed in next mikrobus driver revision*/
+				pinctrl-6 = <>;
+				pinctrl-7 = <
+					&P9_28_spi_cs_pin
+				>;
+				pinctrl-8 = <
+					&P9_28_gpio_pin
+				>;
+				i2c-adapter = <&i2c2>;
+				spi-master = <1>;
+				spi-cs = <0 2>;
+				uart = <&uart2>;
+				pwms = <&ehrpwm1 0 500000 0>;
+				mikrobus-gpios = <&gpio1 18 0> , <&gpio1 16 0>,
+						 <&gpio0 3 0> , <&gpio0 2 0>,
+						 <&gpio0 13 0> , <&gpio0 12 0>,
+						 <&gpio3 16 0> , <&gpio3 15 0>,
+						 <&gpio3 14 0> , <&gpio3 17 0>,
+						 <&gpio1 28 0> , <&gpio1 29 0>;
+			};
+		};
+	};
+};
