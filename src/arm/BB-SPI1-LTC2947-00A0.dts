@@ -28,6 +28,7 @@
 		"P9.29",	/* spi1_d0 */
 		"P9.30",	/* spi1_d1 */
 		"P9.28",	/* spi1_cs0 */
+		"P9.42",	/* spi1_cs1 */
 		/* the hardware ip uses */
 		"spi1";
 
@@ -53,6 +54,7 @@
 		target = <&ocp>;
 		__overlay__ {
 			P9_28_pinmux { status = "disabled"; };	/* spi1_cs0 */
+			P9_42_pinmux { status = "disabled"; };	/* spi1_cs1 */
 			P9_30_pinmux { status = "disabled"; };	/* spi1_d1 */
 			P9_29_pinmux { status = "disabled"; };	/* spi1_d0 */
 			P9_31_pinmux { status = "disabled"; };	/* spi1_sclk */
@@ -69,6 +71,7 @@
 					0x194 0x33	/* mcasp0_fsx.spi1_d0, INPUT_PULLUP | MODE3 */
 					0x198 0x13	/* mcasp0_axr0.spi1_d1, OUTPUT_PULLUP | MODE3 */
 					0x19c 0x13	/* mcasp0_ahclkr.spi1_cs0, OUTPUT_PULLUP | MODE3 */
+					0x164 0x12	/* eCAP0_in_PWM0_out.spi1_cs1 OUTPUT_PULLUP | MODE2 */
 				>;
 			};
 		};
@@ -85,13 +88,22 @@
 			pinctrl-0 = <&bb_spi1_pins>;
 			ti,pio-mode; /* disable dma when used as an overlay, dma gets stuck at 160 bits... */
 
-			ltc2947_spi: ltc2947@0 {
+			ltc2947_spi1_0: ltc2947@0 {
 				#address-cells = <1>;
 				#size-cells = <0>;
 
 				compatible = "adi,ltc2947";
 
 				reg = <0>;
+				spi-max-frequency = <1000000>;
+			};
+			ltc2947_spi1_1: ltc2947@1 {
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				compatible = "adi,ltc2947";
+
+				reg = <1>;
 				spi-max-frequency = <1000000>;
 			};
 		};
