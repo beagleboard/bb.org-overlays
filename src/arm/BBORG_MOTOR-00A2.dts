@@ -1,5 +1,10 @@
 /*
+ * Copyright (C) 2020 Deepak Khatri <deepaklorkhatri7@gmail.com>
+ *  
+ * Based on BBORG_MOTOR-00A2.dts from Robert Nelson for kernel <4.14
  * Copyright (C) 2018 Robert Nelson <robertcnelson@gmail.com>
+ *
+ * Note: Requires Compaibility code from BeagleBoard-DeviceTrees/pull/17
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -9,135 +14,97 @@
 /dts-v1/;
 /plugin/;
 
-#include <dt-bindings/gpio/gpio.h>
-#include <dt-bindings/pinctrl/am33xx.h>
-
-/ {
-	/*
-	 * Helper to show loaded overlays under: /proc/device-tree/chosen/overlays/
-	 */
-	fragment@0 {
-		target-path="/";
-		__overlay__ {
-
-			chosen {
-				overlays {
-					BBORG_MOTOR-00A2 = __TIMESTAMP__;
-				};
-			};
-		};
+/*
+ * Helper to show loaded overlays under: /proc/device-tree/chosen/overlays/
+ */
+&{/chosen} {
+	overlays {
+		BBORG_MOTOR-00A2 = __TIMESTAMP__;
 	};
+};
 
-	/*
-	 * Free up the pins used by the cape from the pinmux helpers.
-	 */
-	fragment@1 {
-		target = <&ocp>;
-		__overlay__ {
-			P8_13_pinmux { status = "disabled"; };	/* m3.pwm2.b */
-			P8_14_pinmux { status = "disabled"; };	/* m3.high */
-			P8_16_pinmux { status = "disabled"; };  /* m2.high */
-			P8_18_pinmux { status = "disabled"; };	/* m1.high */
-			P8_19_pinmux { status = "disabled"; };	/* m4.pwm2.a */
-			P8_26_pinmux { status = "disabled"; };  /* m4.high */
-			P9_14_pinmux { status = "disabled"; };	/* m2.pwm1.a */
-			P9_16_pinmux { status = "disabled"; };	/* m1.pwm1.b */
-		};
-	};
+/*
+ * Free up the pins used by the cape from the pinmux helpers.
+ */
+&ocp {
+	P8_13_pinmux { status = "disabled"; };	/* motor3 speed */
+	P8_14_pinmux { status = "disabled"; };	/* motor3 direction */
+	P8_16_pinmux { status = "disabled"; };  /* motor2 direction */
+	P8_18_pinmux { status = "disabled"; };	/* motor1 direction */
+	P8_19_pinmux { status = "disabled"; };	/* motor4 speed */
+	P8_26_pinmux { status = "disabled"; };  /* motor4 direction */
+	P9_14_pinmux { status = "disabled"; };	/* motor2 speed */
+	P9_16_pinmux { status = "disabled"; };	/* motor1 speed */
+};
 
-	fragment@2 {
-		target = <&am33xx_pinmux>;
-		__overlay__ {
-			bborg_motor_led_pins: pinmux-bborg-proto-led-pins {
-				pinctrl-single,pins = <
-					AM33XX_IOPAD(0x0828, PIN_OUTPUT_PULLUP | INPUT_EN | MUX_MODE7)	/* P8_14: gpmc_ad10.gpio0_26 */
-					AM33XX_IOPAD(0x0838, PIN_OUTPUT_PULLUP | INPUT_EN | MUX_MODE7)	/* P8_16: gpmc_ad14.gpio1_14 */
-					AM33XX_IOPAD(0x088c, PIN_OUTPUT_PULLUP | INPUT_EN | MUX_MODE7)	/* P8_18: gpmc_clk.gpio2_1 */
-					AM33XX_IOPAD(0x087c, PIN_OUTPUT_PULLUP | INPUT_EN | MUX_MODE7)	/* P8_26: gpmc_csn0.gpio1_29 */
-				>;
-			};
+/*
+ * Enable and Update the default state of the pins
+ */
+&ocp {
+	P8_13_pinmux { status = "okay"; pinctrl-0 = <&P8_13_pwm_pin>; };	/* motor3 speed */
+	P8_14_pinmux { status = "okay"; pinctrl-0 = <&P8_14_gpio_pin>; };	/* motor3 direction */
+	P8_16_pinmux { status = "okay"; pinctrl-0 = <&P8_16_gpio_pin>; };	/* motor2 direction */
+	P8_18_pinmux { status = "okay"; pinctrl-0 = <&P8_18_gpio_pin>; };	/* motor1 direction */
+	P8_19_pinmux { status = "okay"; pinctrl-0 = <&P8_19_pwm_pin>; };	/* motor4 speed */
+	P8_26_pinmux { status = "okay"; pinctrl-0 = <&P8_26_gpio_pin>; };	/* motor4 direction */
+	P9_14_pinmux { status = "okay"; pinctrl-0 = <&P9_14_pwm_pin>; };	/* motor2 speed */
+	P9_16_pinmux { status = "okay"; pinctrl-0 = <&P9_16_pwm_pin>; };	/* motor1 speed */
+};
 
-			bborg_motor_ehrpwm1_pins: pinmux-bborg-proto-ehrpwm1-pins {
-				pinctrl-single,pins = <
-					AM33XX_IOPAD(0x0848, PIN_OUTPUT_PULLDOWN | MUX_MODE6)	/* P9_14: gpmc_a2.ehrpwm1a */
-					AM33XX_IOPAD(0x084c, PIN_OUTPUT_PULLDOWN | MUX_MODE6)	/* P9_16: gpmc_a3.ehrpwm1b */
-				>;
-			};
+// Motor 1, 2
+&bone_pwmss_1 {
+	status = "okay";
+};
 
-			bborg_motor_ehrpwm2_pins: pinmux-bborg-proto-ehrpwm2-pins {
-				pinctrl-single,pins = <
-					AM33XX_IOPAD(0x0824, PIN_OUTPUT_PULLDOWN | MUX_MODE4)	/* P8_13: gpmc_ad9.ehrpwm2b */
-					AM33XX_IOPAD(0x0820, PIN_OUTPUT_PULLDOWN | MUX_MODE4)	/* P8_19: gpmc_ad8.ehrpwm2a */
-				>;
-			};
-		};
-	};
+&bone_pwm_1 {
+	status = "okay";
+};
 
-	fragment@3 {
-		target = <&epwmss1>;
-		__overlay__ {
+// Motor 3, 4
+&bone_pwmss_2 {
+	status = "okay";
+};
+
+&bone_pwm_2 {
+	status = "okay";
+};
+
+
+/*
+ * Easy Motor direction control through sysfs (/sys/class/leds/motor*) using gpio-leds driver
+ * See these files for the led_P8_#/led_P9_#  definition
+ * https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/bbai-bone-buses.dtsi
+ * https://github.com/beagleboard/BeagleBoard-DeviceTrees/src/arm/bbb-bone-buses.dtsi
+ * 
+ */
+&{/} {
+	leds {
+		// Motor 1
+		led_P8_18 {
 			status = "okay";
+			label = "motor1";
+			default-state = "off";
 		};
-	};
 
-	fragment@4 {
-		target = <&ehrpwm1>;
-		__overlay__ {
-			pinctrl-names = "default";
-			pinctrl-0 = <&bborg_motor_ehrpwm1_pins>;
+		// Motor 2
+		led_P8_16 {
 			status = "okay";
+			label = "motor2";
+			default-state = "off";
 		};
-	};
 
-	fragment@5 {
-		target = <&epwmss2>;
-		__overlay__ {
+		// Motor 3
+		led_P8_14 {
 			status = "okay";
+			label = "motor3";
+			default-state = "off";
 		};
-	};
 
-	fragment@6 {
-		target = <&ehrpwm2>;
-		__overlay__ {
-			pinctrl-names = "default";
-			pinctrl-0 = <&bborg_motor_ehrpwm2_pins>;
+		// Motor 4
+		led_P8_26 {
 			status = "okay";
-		};
-	};
-
-	fragment@7 {
-		target-path="/";
-		__overlay__ {
-
-			leds {
-				pinctrl-names = "default";
-				pinctrl-0 = <&bborg_motor_led_pins>;
-				compatible = "gpio-leds";
-
-				m1_high {
-					label = "m1_high";
-					gpios = <&gpio2 1 GPIO_ACTIVE_HIGH>;
-					default-state = "off";
-				};
-
-				m2_high {
-					label = "m2_high";
-					gpios = <&gpio1 14 GPIO_ACTIVE_HIGH>;
-					default-state = "off";
-				};
-
-				m3_high {
-					label = "m3_high";
-					gpios = <&gpio0 26 GPIO_ACTIVE_HIGH>;
-					default-state = "off";
-				};
-
-				m4_high {
-					label = "m4_high";
-					gpios = <&gpio1 29 GPIO_ACTIVE_HIGH>;
-					default-state = "off";
-				};
-			};
+			label = "motor4";
+			default-state = "off";
 		};
 	};
 };
