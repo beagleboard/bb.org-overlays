@@ -76,7 +76,7 @@
 		__overlay__ {
 			status = "okay";
 			pinctrl-names = "default";
-                        pinctrl-0 = <&bb_i2c1_pins>;
+			pinctrl-0 = <&bb_i2c1_pins>;
 			#address-cells = <1>;
 			#size-cells = <0>;
  
