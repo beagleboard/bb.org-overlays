@@ -1,0 +1,89 @@
+/*
+ * Copyright (C) 2021 Sam Cohen <samc1213@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ *
+ * Based on BB-I2C2-RTC-DS3231.dts:
+ * Copyright (C) 2019 Tomas Arturo Herrera Castro <taherrera@uc.cl>
+ *
+ * DTS file for DS3231 Real Time Clock, running on the I2C1 interface. Also see
+ * BB-I2C2-RTC-DS3231.dts to run this RTC on I2C2.
+ *
+ * Tested on BeagleBone Black Wireless
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/board/am335x-bbw-bbb-base.h>
+#include <dt-bindings/pinctrl/am33xx.h>
+#include <dt-bindings/gpio/gpio.h>
+
+/ {
+	/*
+	 * Helper to show loaded overlays under: /proc/device-tree/chosen/overlays/
+	 */
+	fragment@0 {
+		target-path="/";
+		__overlay__ {
+
+			chosen {
+				overlays {
+					BB-I2C1-RTC-DS3231 = __TIMESTAMP__;
+				};
+			};
+		};
+	};
+
+	/*
+	 * Free up the pins used by the cape from the pinmux helpers.
+	 */
+	fragment@1 {
+		target = <&ocp>;
+		__overlay__ {
+			P9_17_pinmux { status = "disabled"; };	/* i2c1_scl */
+			P9_18_pinmux { status = "disabled"; };	/* i2c1_sda */
+		};
+	};
+
+	fragment@2 {
+		target-path="/";
+		__overlay__ {
+			aliases {
+				rtc0 = &extrtc;
+				rtc1 = "/ocp/rtc@44e3e000";
+			};
+		};
+	};
+
+	fragment@3 {
+		target = <&am33xx_pinmux>;
+		__overlay__ {
+
+			bb_i2c1_pins: pinmux_bb_i2c1_pins {
+				pinctrl-single,pins = <
+					BONE_P9_18 (SLEWCTRL_SLOW | PIN_INPUT_PULLUP | MUX_MODE2) /* spi0_d1.i2c1_sda */
+					BONE_P9_17 (SLEWCTRL_SLOW | PIN_INPUT_PULLUP | MUX_MODE2) /* spi0_cs0.i2c1_scl */
+				>;
+			};
+		};
+	};
+
+	fragment@4 {
+		target = <&i2c1>;
+		__overlay__ {
+			status = "okay";
+			pinctrl-names = "default";
+                        pinctrl-0 = <&bb_i2c1_pins>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+ 
+			extrtc: ds3231@68 {
+				compatible = "maxim,ds3231";
+				reg = <0x68>;
+			};
+		};
+	};
+};
