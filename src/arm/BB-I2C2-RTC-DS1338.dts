@@ -50,9 +50,9 @@
 			aliases {
 				rtc0 = &extrtc;
 				/* The OMAP RTC implementation in the BBB is
-				 * buggy, so that it cannot be used as a
-				 * battery-backed RTS, so that it loses its
-				 * contents when power is removed from the
+				 * buggy, and cannot be used as a
+				 * battery-backed time source because it loses
+				 * its contents when power is removed from the
 				 * Beaglebone...
 				 *
 				 * We move the omap built-in RTC to rtc1, so
