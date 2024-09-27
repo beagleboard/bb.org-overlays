@@ -32,6 +32,7 @@
 #include <dirent.h>
 #include <sys/param.h>
 
+#define PLATFORMBASE "/sys/devices/platform/ocp/"
 #define NAMES		"/sys/firmware/devicetree/base/ocp/%s_pinmux/pinctrl-names"
 #define STATE_AI   "/sys/devices/platform/44000000.ocp/44000000.ocp:%s_pinmux/state"
 #define STATE		"/sys/devices/platform/ocp/ocp:%s_pinmux/state"
@@ -70,7 +71,7 @@ static int RunShellCmd(char *cmd, char *buff, const int BUFF_SIZE) {
 }
 
 // Returns -1 if fails
-static int GetGpio(char *pin) {
+static int GetGpio(char *pin, int print) {
   char cmd[255];
   char cmdout[255];
   char *temp_pin_name;
@@ -131,6 +132,12 @@ static int GetGpio(char *pin) {
   // Calculate sysfs GPIO number
 
   gpio = atoi(&chip) * 32 + atoi(gpio_chip);
+
+  if (print == 1)
+  {
+    printf("Physical Pin: %s -> gpio%d\n",pin, gpio);
+    return 0;
+  }
   return gpio;
 }
 
@@ -161,13 +168,15 @@ static void ListModes(char *pin)
 
   // Read the modes list file
 
-  len = read(nf, buf, sizeof(buf));
+  len = read(nf, buf, sizeof(buf) -1 );
   if (len < 0)
   {
     fprintf(stderr, "ERROR: read() from %s failed, %s\n", filename,
       strerror(errno));
     exit(1);
   }
+
+  buf[len] = '\0';
 
   // Display the available modes
 
@@ -188,7 +197,7 @@ static void ListModes(char *pin)
   close(nf);
 }
 
-static void QueryMode(char *pin)
+static void QueryMode(char *pin, int newline)
 {
   char filename[MAXPATHLEN];
   int sf;
@@ -219,10 +228,9 @@ static void QueryMode(char *pin)
       strerror(errno));
     exit(1);
   }
-
   // Read the current mode file
 
-  len = read(sf, buf, sizeof(buf));
+  len = read(sf, buf, sizeof(buf) - 1 ); // Leave space for null terminator
   if (len < 0)
   {
     fprintf(stderr, "ERROR: read() from %s failed, %s\n", filename,
@@ -230,12 +238,19 @@ static void QueryMode(char *pin)
     exit(1);
   }
 
+  // Add null terminator to the buffer, as read system call does not add a null terminator
+  buf[len] = '\0';
+
   // Display the current mode
 
-  printf("\nCurrent mode for %s is:     %s\n", pin, buf);
-
+  if (newline == 1)
+  {
+    printf("\nCurrent mode for %s is:     %s", pin, buf);
+  }
+  else {
+    printf("\nCurrent mode for %s is:     %s\n", pin, buf);
+  }
   // Close the current mode file
-
   close(sf);
 }
 
@@ -330,7 +345,7 @@ static void ConfigureMode(char *pin, char *mode, bool quiet)
   // Update GPIO direction (if applicable)
 
   if(inout) {
-    int gpio = GetGpio(pin);
+    int gpio = GetGpio(pin,0);
 
     if(gpio == -1)
       fprintf(stderr, "ERROR: Could not find GPIO number for pin %s", pin);
@@ -374,14 +389,95 @@ static void ConfigFile(char *filename)
   fclose(cf);
 }
 
+// Function to extract pin name between ":" and "pinmux"
+static void extract_pin_name(char *full_string, char *pin_name) {
+    char *start, *end;
+
+    // Find the part of the string after the colon ":"
+    start = strchr(full_string, ':');
+    if (start == NULL) {
+        fprintf(stderr, "ERROR: Could not find colon in the string.\n");
+        return;
+    }
+
+    // Move pointer after the colon
+    start++;
+
+    // Find the part of the string before "pinmux"
+    end = strstr(start, "_pinmux");
+    if (end == NULL) {
+        fprintf(stderr, "ERROR: Could not find '_pinmux' in the string.\n");
+        return;
+    }
+
+    // Calculate the length of the pin name and copy it to pin_name
+    size_t length = end - start;
+    strncpy(pin_name, start, length);
+    pin_name[length] = '\0'; // Null-terminate the string
+}
+
+// List all available pins with extracted pin names
+static void ListAllPins() {
+    DIR *d;
+    struct dirent *dir;
+    char filename[MAXPATHLEN];
+    char pin_name[32];
+
+    // Open the directory containing pin information
+    d = opendir(PLATFORMBASE);
+    if (d == NULL) {
+        fprintf(stderr, "ERROR: Unable to open %s, %s\n", PLATFORMBASE, strerror(errno));
+        exit(1);
+    }
+
+    printf("\nListing all pins with current mode and available modes:\n");
+
+    // Traverse the directory to find relevant pin files
+    while ((dir = readdir(d)) != NULL) {
+        // Look for entries that contain "pinmux" in the name
+        if (strstr(dir->d_name, "pinmux") != NULL) {
+            // Construct the full filename path (for debugging or further use)
+            snprintf(filename, sizeof(filename), PLATFORMBASE"%s", dir->d_name);
+
+            // Extract the pin name between ":" and "_pinmux"
+            extract_pin_name(filename, pin_name);
+            
+            // Physical to GPIO 
+            GetGpio(pin_name,1);
+
+            // Query the current mode of the pin
+            QueryMode(pin_name,1);
+
+            // List the available modes for the pin
+            ListModes(pin_name);
+
+            // Line Separator
+            printf("----------------------------------------------------------------------------------------------------\n");
+        }
+    }
+
+    closedir(d);
+    printf("Finished listing all pins.\n");
+}
+
 int main(int argc, char *argv[])
 {
+  if (argc == 2 && !strcasecmp(argv[1], "-a"))
+  {
+    ListAllPins(); // List all pins with their modes
+    exit(0);
+  }
+
   if (argc != 3)
   {
     fprintf(stderr, "\nGPIO Pin Configurator\n\n");
+
+
     fprintf(stderr, "Usage: config-pin -c <filename>\n");
     fprintf(stderr, "       config-pin -l <pin>\n");
     fprintf(stderr, "       config-pin -q <pin>\n");
+    fprintf(stderr, "       config-pin -g <pin>\n");
+    fprintf(stderr, "       config-pin -a (to list all pins)\n\n");
     fprintf(stderr, "       config-pin <pin> <mode>\n\n");
     exit(1);
   }
@@ -391,7 +487,9 @@ int main(int argc, char *argv[])
   else if (!strcasecmp(argv[1], "-l"))
     ListModes(argv[2]);
   else if (!strcasecmp(argv[1], "-q"))
-    QueryMode(argv[2]);
+    QueryMode(argv[2],0);
+  else if (!strcasecmp(argv[1], "-g"))
+    GetGpio(argv[2],1);
   else
     ConfigureMode(argv[1], argv[2], false);
 
