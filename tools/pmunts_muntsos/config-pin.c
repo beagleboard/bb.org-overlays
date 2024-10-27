@@ -75,7 +75,7 @@ static int GetGpio(char *pin, int print) {
   char cmd[255];
   char cmdout[255];
   char *temp_pin_name;
-  char pin_name[32];
+  char pin_name[32]={0};
   char chip;
   char gpio_chip[3];
   int gpio, status;
@@ -108,8 +108,13 @@ static int GetGpio(char *pin, int print) {
   strtok(NULL, " ");
   temp_pin_name = strtok(NULL, " "); // Pin name is the third word of gpioinfo output
   
-  strncpy(pin_name, temp_pin_name + 1, strlen(temp_pin_name) - 1); // Remove quotes surrounding pin name
-  pin_name[strlen(temp_pin_name) - 2] = '\0'; // Need to manually add null terminator with strncpy
+  strcat(pin_name,temp_pin_name); // Get pin name with quotes
+  while(temp_pin_name[strlen(temp_pin_name)-1]!='"') //if no end quote
+  {
+          strcat(pin_name," ");
+          temp_pin_name = strtok(NULL, " "); //get next word 
+          strcat(pin_name,temp_pin_name);
+  }
 
   // Run gpiofind [pin_name]
 
@@ -117,7 +122,7 @@ static int GetGpio(char *pin, int print) {
   strcat(cmd, pin_name);
   RunShellCmd(cmd, cmdout, sizeof(cmdout));
 
-  if(status == -1 || cmdout[0] == '\0') // Check for error or empty string (meaning pin could not be found)
+  if(status == -1 || cmdout[0] == '\0' || strlen(cmdout)<9) // Check for error or empty string (meaning pin could not be found)
     return -1;
 
   // Get GPIO chip (parse gpiofind output)
