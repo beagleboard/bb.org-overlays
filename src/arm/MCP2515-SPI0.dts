@@ -10,7 +10,7 @@
 
    add this to /boot/uEnv.txt:
    uboot_overlay_addr0=/lib/firmware/BB-SPIDEV0-00A0.dtbo
-   uboot_overlay_addr1=/lib/firmware/MCP2515.dtbo
+   uboot_overlay_addr1=/lib/firmware/MCP2515-SPI0.dtbo
 */
 
 /dts-v1/;
