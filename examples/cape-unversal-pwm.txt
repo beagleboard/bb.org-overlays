@@ -1,3 +1,11 @@
+NOTE:
+The config-pin source file (tools/pmunts_muntsos/config-pin.c)
+is not included in this repository by default.
+
+Before using config-pin, run:
+  tools/pmunts_muntsos/grab_latest.sh
+
+This script fetches config-pin.c from upstream so it can be built and used.
 #PWM's change on every bootup:
 
 root@beaglebone:/sys/class/pwm# ls -lh
